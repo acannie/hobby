@@ -175,26 +175,17 @@ int main()
             hyouji(player, space, buf1, buf2);
 
             cout << active_player << " win!" << endl;
+
             cout << endl;
 
             break;
         }
 
+
         /* 次ターン判定 */
         if (active_player == 1)
         {
-            if (flg_buf == true)
-            {
-                active_player = 1;
-            }
-            else
-            {
-                active_player = 2;
-            }
-        }
-        else
-        {
-            if (flg_buf == true)
+            if (active_player == 1)
             {
                 active_player = 2;
             }
