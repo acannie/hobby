@@ -176,7 +176,7 @@ int main()
 
             cout << player[1] << " win!" << endl;
             cout << endl;
-            
+
             break;
         }
         else if ((space[2][1] == 0) && (space[2][2] == 0) && (space[2][3] == 0))
@@ -194,20 +194,9 @@ int main()
         }
 
         /* 再ターン判定 */
-        if (active_player == 1)
+        if (flg_buf == false)
         {
-            if (flg_buf == true)
-            {
-                active_player = 1;
-            }
-            else
-            {
-                active_player = 2;
-            }
-        }
-        else
-        {
-            if (flg_buf == true)
+            if (active_player == 1)
             {
                 active_player = 2;
             }
