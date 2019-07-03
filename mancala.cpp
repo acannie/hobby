@@ -166,7 +166,7 @@ int main()
         cout << endl;
 
         /* 終了判定 */
-        if ((space[1][1] == 0) && (space[1][2] == 0) && (space[1][3] == 0))
+        if ((space[active_player][1] == 0) && (space[active_player][2] == 0) && (space[active_player][3] == 0))
         {
             /* 終了状態表示 */
             cout << "--- LAST STATE ------------------------------------" << endl;
@@ -174,27 +174,16 @@ int main()
 
             hyouji(player, space, buf1, buf2);
 
-            cout << player[1] << " win!" << endl;
-            cout << endl;
+            cout << active_player << " win!" << endl;
 
-            break;
-        }
-        else if ((space[2][1] == 0) && (space[2][2] == 0) && (space[2][3] == 0))
-        {
-            /* 終了状態表示 */
-            cout << "--- LAST STATE ------------------------------------" << endl;
-            cout << endl;
-
-            hyouji(player, space, buf1, buf2);
-
-            cout << player[2] << " win!" << endl;
             cout << endl;
 
             break;
         }
 
-        /* 再ターン判定 */
-        if (flg_buf == false)
+
+        /* 次ターン判定 */
+        if (active_player == 1)
         {
             if (active_player == 1)
             {

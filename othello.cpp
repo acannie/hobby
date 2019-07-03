@@ -308,7 +308,7 @@ int main()
             /* エラーチェック */
             if (error == true)
             {
-                cout << "Error! Please sel again." << endl;
+                cout << "Error! Please select again." << endl;
             }
             else
             {
