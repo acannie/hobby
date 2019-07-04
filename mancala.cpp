@@ -183,7 +183,11 @@ int main()
 
 
         /* 次ターン判定 */
+<<<<<<< HEAD
         if (flg_buf == true)
+=======
+        if (flg_buf == false)
+>>>>>>> 05fa1a8992bf3637736136d0238d882cbe371337
         {
             if (active_player == 1)
             {
