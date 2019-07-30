@@ -1,17 +1,27 @@
 #include <iostream>
-#include <string>
+#include <cstring>
+#include <cstdint>
 #include <utf8.h>
-using namespace std;
 
-int main()
-{
-    string japanese;
+int main() {
+  const char* str1 = u8"明日天気にな〜れ";
 
-    japanese = u8'あいうえお';
+  const char* it = str1;
+  const char* end = str1 + strlen(str1);
 
-    cout << japanese << endl;
+  // 文字列の長さを取得
+  int length = utf8::distance(it, end);
+  std::cout << "長さ: " << length << std::endl;
 
-    cout << 'かきくけこ' << endl;
+  std::cout << std::hex;
 
-    return 0;
+  while (it < end) {
+    // イテレータを1文字分すすめる
+    std::uint32_t code = utf8::next(it, end);
+
+    // 該当位置の文字コードを出力
+    std::cout << code << std::endl;
+  }
+
+  return 0;
 }
