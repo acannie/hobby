@@ -25,9 +25,13 @@ int fib2(int n)
 
     for (i = 2; i < n; i++)
     {
-        tmp = n1 + n2;
+        tmp = n2;
+        n2 = n1 + n2;
+        n1 = tmp;
+
+        /*tmp = n1 + n2;
         n1 = n2;
-        n2 = tmp;
+        n2 = tmp;*/
     }
     return n2;
 }

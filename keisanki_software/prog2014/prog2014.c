@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int x[5] = {5, 4, 3, 2, 1};
+int x[5] = {5, 1, 4, 3, 2};
 int n = sizeof(x) / sizeof(x[0]);
 
 void sort(int m);
