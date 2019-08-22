@@ -174,7 +174,7 @@ int main()
 
             hyouji(player, space, buf1, buf2);
 
-            cout << active_player << " win!" << endl;
+            cout << player[active_player] << " win!" << endl;
 
             cout << endl;
 
@@ -182,25 +182,9 @@ int main()
         }
 
         /* 次ターン判定 */
-        if (flg_buf == true)
+        if (flg_buf == false)
         {
-            if (active_player == 1)
-            {
-                active_player = 1;
-            }
-            else
-            {
-                active_player = 2;
-            }
-        }else{
-            if (active_player == 1)
-            {
-                active_player = 2;
-            }
-            else
-            {
-                active_player = 1;
-            }
+            active_player = !(active_player - 1) + 1;
         }
     }
 
