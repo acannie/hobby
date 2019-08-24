@@ -58,8 +58,9 @@ int main()
 
             if (J != 10 && I != 10 && i != upsidedown(i) && j != upsidedown(j) && i != upsidedown(j) && J * I == buf)
             {
-                cout << i << " * " << j << " = " << buf << endl;
-                cout << J << " * " << I << " = " << J * I << endl;
+                cout << i << " * " << j << " = " << J << " * " << I << endl;
+                cout << " = " << buf << endl;
+
                 cout << endl;
                 count++;
             }
