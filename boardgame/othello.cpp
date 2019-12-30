@@ -12,174 +12,50 @@ std::string join(const vector<string> &vec, const char *delim)
     return res.str();
 }
 
-bool try_and_set_right(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
+int check(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol, int x_delta, int y_delta)
 {
-    for (int k = 1; k <= (NUM - j_sel); k++)
+    if (cell[i_sel][j_sel] != ' ')
+        return -1;
+
+    int i = i_sel + y_delta;
+    int j = j_sel + x_delta;
+    int count = 0;
+    while ((1 <= j && j <= NUM) && (1 <= i && i <= NUM))
     {
-        if (cell[i_sel][j_sel + k] == ' ')
+        if (cell[i][j] != rival_symbol)
         {
+            // at least 1 rival symbol must appear
+            if (cell[i][j] == ally_symbol && count > 0)
+            {
+                return count;
+            }
+
             break;
         }
-        else if ((cell[i_sel][j_sel + k] == ally_symbol) && (k != 1))
-        {
-            for (int k_change = 1; k_change < k; k_change++)
-            {
-                cell[i_sel][j_sel + k_change] = ally_symbol;
-            }
-            return true;
-        }
+
+        count++;
+        i += y_delta;
+        j += x_delta;
     }
-    return false;
+    return -1;
 }
 
-bool try_and_set_left(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
+bool try_and_set_direction(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol, int x_delta, int y_delta)
 {
-    for (int k = 1; k <= (j_sel - 1); k++)
-    {
-        if (cell[i_sel][j_sel - k] == ' ')
-        {
-            break;
-        }
-        else if ((cell[i_sel][j_sel - k] == ally_symbol) && (k != 1))
-        {
+    int count = check(cell, i_sel, j_sel, ally_symbol, rival_symbol, x_delta, y_delta);
 
-            for (int k_change = 1; k_change < k; k_change++)
-            {
-                cell[i_sel][j_sel - k_change] = ally_symbol;
-            }
-            return true;
-        }
+    if (count < 0)
+    {
+        return false;
     }
 
-    return false;
-}
-
-bool try_and_set_down(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
-{
-    for (int k = 1; k <= (NUM - i_sel); k++)
+    int i = i_sel;
+    int j = j_sel;
+    for (int k = 1; k <= count; k++)
     {
-        if (cell[i_sel + k][j_sel] == ' ')
-        {
-            break;
-        }
-        else if ((cell[i_sel + k][j_sel] == ally_symbol) && (k != 1))
-        {
-
-            for (int k_change = 1; k_change < k; k_change++)
-            {
-                cell[i_sel + k_change][j_sel] = ally_symbol;
-            }
-            return true;
-        }
+        cell[i + k * y_delta][j + k * x_delta] = ally_symbol;
     }
-
-    return false;
-}
-bool try_and_set_up(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
-{
-    for (int k = 1; k <= (i_sel - 1); k++)
-    {
-        if (cell[i_sel - k][j_sel] == ' ')
-        {
-            break;
-        }
-        else if ((cell[i_sel - k][j_sel] == ally_symbol) && (k != 1))
-        {
-
-            for (int k_change = 1; k_change < k; k_change++)
-            {
-                cell[i_sel - k_change][j_sel] = ally_symbol;
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
-bool try_and_set_right_down(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
-{
-    for (int k = 1; k <= min(NUM - i_sel, NUM - j_sel); k++)
-    {
-        if (cell[i_sel + k][j_sel + k] == ' ')
-        {
-            break;
-        }
-        else if ((cell[i_sel + k][j_sel + k] == ally_symbol) && (k != 1))
-        {
-
-            for (int k_change = 1; k_change < k; k_change++)
-            {
-                cell[i_sel + k_change][j_sel + k_change] = ally_symbol;
-            }
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool try_and_set_right_up(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
-{
-    for (int k = 1; k <= min(i_sel - 1, NUM - j_sel); k++)
-    {
-        if (cell[i_sel - k][j_sel + k] == ' ')
-        {
-            break;
-        }
-        else if ((cell[i_sel - k][j_sel + k] == ally_symbol) && (k != 1))
-        {
-
-            for (int k_change = 1; k_change < k; k_change++)
-            {
-                cell[i_sel - k_change][j_sel + k_change] = ally_symbol;
-            }
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool try_and_set_left_down(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
-{
-    for (int k = 1; k <= min(NUM - i_sel, j_sel - 1); k++)
-    {
-        if (cell[i_sel + k][j_sel - k] == ' ')
-        {
-            break;
-        }
-        else if ((cell[i_sel + k][j_sel - k] == ally_symbol) && (k != 1))
-        {
-
-            for (int k_change = 1; k_change < k; k_change++)
-            {
-                cell[i_sel + k_change][j_sel - k_change] = ally_symbol;
-            }
-            return true;
-        }
-    }
-
-    return false;
-}
-bool try_and_set_left_up(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
-{
-    for (int k = 1; k <= min(i_sel - 1, j_sel - 1); k++)
-    {
-        if (cell[i_sel - k][j_sel - k] == ' ')
-        {
-            break;
-        }
-        else if ((cell[i_sel - k][j_sel - k] == ally_symbol) && (k != 1))
-        {
-
-            for (int k_change = 1; k_change < k; k_change++)
-            {
-                cell[i_sel - k_change][j_sel - k_change] = ally_symbol;
-            }
-            return true;
-        }
-    }
-    return false;
+    return true;
 }
 
 bool try_and_set(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
@@ -191,52 +67,22 @@ bool try_and_set(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally
 
     /* サーチ */
     bool success = false;
-    /* 右サーチ */
-    if (j_sel < NUM - 1)
+
+    for (int x_delta = -1; x_delta <= 1; x_delta++)
     {
-        success = success || try_and_set_right(cell, i_sel, j_sel, ally_symbol, rival_symbol);
+        for (int y_delta = -1; y_delta <= 1; y_delta++)
+        {
+            if (x_delta == 0 && y_delta == 0)
+            {
+                continue;
+            }
+            success = try_and_set_direction(cell, i_sel, j_sel, ally_symbol, rival_symbol, x_delta, y_delta) || success;
+        }
     }
 
-    /* 左サーチ */
-    if (j_sel > 2)
+    if (success)
     {
-        success = success || try_and_set_right(cell, i_sel, j_sel, ally_symbol, rival_symbol);
-    }
-
-    /* 下サーチ */
-    if (i_sel < NUM - 1)
-    {
-        success = success || try_and_set_right(cell, i_sel, j_sel, ally_symbol, rival_symbol);
-    }
-
-    /* 上サーチ */
-    if (i_sel > 2)
-    {
-        success = success || try_and_set_right(cell, i_sel, j_sel, ally_symbol, rival_symbol);
-    }
-
-    /* 右下サーチ */
-    if (!((i_sel > NUM - 2) || (j_sel > NUM - 2)))
-    {
-        success = success || try_and_set_right(cell, i_sel, j_sel, ally_symbol, rival_symbol);
-    }
-
-    /* 右上サーチ */
-    if (!((i_sel < 2) || (j_sel > NUM - 2)))
-    {
-        success = success || try_and_set_right(cell, i_sel, j_sel, ally_symbol, rival_symbol);
-    }
-
-    /* 左下サーチ */
-    if (!((i_sel > NUM - 2) || (j_sel < 2)))
-    {
-        success = success || try_and_set_right(cell, i_sel, j_sel, ally_symbol, rival_symbol);
-    }
-
-    /* 左上サーチ */
-    if (!((i_sel < 2) || (j_sel < 2)))
-    {
-        success = success || try_and_set_right(cell, i_sel, j_sel, ally_symbol, rival_symbol);
+        cell[i_sel][j_sel] = ally_symbol;
     }
 
     return success;
