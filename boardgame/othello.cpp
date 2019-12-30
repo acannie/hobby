@@ -12,7 +12,7 @@ std::string join(const vector<string> &vec, const char *delim)
     return res.str();
 }
 
-int check(char (&cell)[NUM + 1][NUM + 1], int col, int row, char ally_symbol, char rival_symbol, int c_delta, int r_delta)
+int count_direction(vector<vector<char>> &cell, int col, int row, char ally_symbol, char rival_symbol, int c_delta, int r_delta)
 {
     if (cell[row][col] != ' ')
         return -1;
@@ -40,11 +40,33 @@ int check(char (&cell)[NUM + 1][NUM + 1], int col, int row, char ally_symbol, ch
     return -1;
 }
 
-bool try_and_set_direction(char (&cell)[NUM + 1][NUM + 1], int col, int row, char ally_symbol, char rival_symbol, int c_delta, int r_delta)
+vector<vector<int>> count_all_directions(vector<vector<char>> &cell, int col, int row, char ally_symbol, char rival_symbol)
 {
-    int count = check(cell, col, row, ally_symbol, rival_symbol, c_delta, r_delta);
+    vector<vector<int>> result(3, std::vector<int>(3, -1));
 
-    if (count < 0)
+    if (cell[row][col] != ' ')
+    {
+        return result;
+    }
+
+    for (int r_delta = -1; r_delta <= 1; r_delta++)
+    {
+        for (int c_delta = -1; c_delta <= 1; c_delta++)
+        {
+            if (r_delta == 0 && c_delta == 0)
+            {
+                continue;
+            }
+            result[r_delta + 1][c_delta + 1] = count_direction(cell, col, row, ally_symbol, rival_symbol, c_delta, r_delta);
+        }
+    }
+
+    return result;
+}
+
+bool set_direction(vector<vector<char>> &cell, int col, int row, char ally_symbol, char rival_symbol, int c_delta, int r_delta, int count)
+{
+    if (count <= 0)
     {
         return false;
     }
@@ -53,17 +75,15 @@ bool try_and_set_direction(char (&cell)[NUM + 1][NUM + 1], int col, int row, cha
     {
         cell[row + k * r_delta][col + k * c_delta] = ally_symbol;
     }
+
+    cell[row][col] = ally_symbol;
+
     return true;
 }
 
-bool try_and_set(char (&cell)[NUM + 1][NUM + 1], int col, int row, char ally_symbol, char rival_symbol)
+bool set_all_directions(vector<vector<char>> &cell, int col, int row, char ally_symbol, char rival_symbol, vector<vector<int>> count)
 {
-    if (cell[row][col] != ' ')
-    {
-        return false;
-    }
-
-    /* サーチ */
+    /* どれか一つの方向で、ひっくり返るものがあるか */
     bool success = false;
 
     for (int r_delta = -1; r_delta <= 1; r_delta++)
@@ -74,19 +94,33 @@ bool try_and_set(char (&cell)[NUM + 1][NUM + 1], int col, int row, char ally_sym
             {
                 continue;
             }
-            success = try_and_set_direction(cell, col, row, ally_symbol, rival_symbol, c_delta, r_delta) || success;
+            success = set_direction(cell, col, row, ally_symbol, rival_symbol, c_delta, r_delta, count[r_delta + 1][c_delta + 1]) || success;
         }
     }
-
-    if (success)
-    {
-        cell[row][col] = ally_symbol;
-    }
-
     return success;
 }
 
-void display(char cell[NUM + 1][NUM + 1])
+bool can_place(vector<vector<char>> &cell, char ally_symbol, char rival_symbol)
+{
+    for (int row = 1; row <= NUM; row++)
+    {
+        for (int col = 1; col <= NUM; col++)
+        {
+            vector<vector<int>> count = count_all_directions(cell, col, row, ally_symbol, rival_symbol);
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    if (count[j][i] > 0)
+                        return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void display(std::vector<std::vector<char>> cell)
 {
     string show;
     vector<std::string> row;
@@ -124,8 +158,9 @@ int main()
     cout << endl;
 
     /* 初期状態設定 */
-    char cell[NUM + 1][NUM + 1];
-    std::fill(cell[0], cell[NUM + 1], ' ');
+    std::vector<std::vector<char>> cell(NUM + 1, std::vector<char>(NUM + 1, ' '));
+    // char cell[NUM + 1][NUM + 1];
+    // std::fill(cell[0], cell[NUM + 1], ' ');
 
     for (int i = 0; i <= NUM; i++)
     {
@@ -191,7 +226,8 @@ int main()
             cout << "(col, row) --> ";
             cin >> col >> row;
 
-            success = try_and_set(cell, col, row, ally_symbol, rival_symbol);
+            success = set_all_directions(cell, col, row, ally_symbol, rival_symbol,
+                                         count_all_directions(cell, col, row, ally_symbol, rival_symbol));
 
             /* エラーチェック */
             if (!success)
