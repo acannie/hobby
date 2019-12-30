@@ -1,45 +1,146 @@
-#include <iostream>
-#include <cmath>
-#include <string>
+#include <bits/stdc++.h>
 
 #define NUM 8
 
 using namespace std;
 
-void hyouji(char cell[NUM + 1][NUM + 1])
+// TODO template
+std::string join(const vector<string> &vec, const char *delim)
 {
-    cout << "    ";
-    for (int i = 1; i <= NUM; i++)
-    {
-        cout << i << "   ";
-    }
-    cout << endl;
+    stringstream res;
+    copy(vec.begin(), vec.end(), ostream_iterator<string>(res, delim));
+    return res.str();
+}
 
-    cout << "  ---------------------------------" << endl;
+int count_direction(vector<vector<char>> &cell, int col, int row, char ally_symbol, char rival_symbol, int c_delta, int r_delta)
+{
+    if (cell[row][col] != ' ')
+        return -1;
 
-    for (int i = 1; i <= NUM; i++)
+    int c = col + c_delta;
+    int r = row + r_delta;
+    int count = 0;
+    while ((1 <= r && r <= NUM) && (1 <= c && c <= NUM))
     {
-        cout << i << " |";
-        for (int j = 1; j <= NUM; j++)
+        if (cell[r][c] != rival_symbol)
         {
-            if (cell[i][j] == 'o')
+            // at least 1 rival symbol must appear
+            if (cell[r][c] == ally_symbol && count > 0)
             {
-                cout << " o |";
+                return count;
             }
-            else if (cell[i][j] == 'x')
+
+            break;
+        }
+
+        count++;
+        c += c_delta;
+        r += r_delta;
+    }
+    return -1;
+}
+
+vector<vector<int>> count_all_directions(vector<vector<char>> &cell, int col, int row, char ally_symbol, char rival_symbol)
+{
+    vector<vector<int>> result(3, std::vector<int>(3, -1));
+
+    if (cell[row][col] != ' ')
+    {
+        return result;
+    }
+
+    for (int r_delta = -1; r_delta <= 1; r_delta++)
+    {
+        for (int c_delta = -1; c_delta <= 1; c_delta++)
+        {
+            if (r_delta == 0 && c_delta == 0)
             {
-                cout << " x |";
+                continue;
             }
-            else
+            result[r_delta + 1][c_delta + 1] = count_direction(cell, col, row, ally_symbol, rival_symbol, c_delta, r_delta);
+        }
+    }
+
+    return result;
+}
+
+bool set_direction(vector<vector<char>> &cell, int col, int row, char ally_symbol, char rival_symbol, int c_delta, int r_delta, int count)
+{
+    if (count <= 0)
+    {
+        return false;
+    }
+
+    for (int k = 1; k <= count; k++)
+    {
+        cell[row + k * r_delta][col + k * c_delta] = ally_symbol;
+    }
+
+    cell[row][col] = ally_symbol;
+
+    return true;
+}
+
+bool set_all_directions(vector<vector<char>> &cell, int col, int row, char ally_symbol, char rival_symbol, vector<vector<int>> count)
+{
+    /* どれか一つの方向で、ひっくり返るものがあるか */
+    bool success = false;
+
+    for (int r_delta = -1; r_delta <= 1; r_delta++)
+    {
+        for (int c_delta = -1; c_delta <= 1; c_delta++)
+        {
+            if (r_delta == 0 && c_delta == 0)
             {
-                cout << "   |";
+                continue;
+            }
+            success = set_direction(cell, col, row, ally_symbol, rival_symbol, c_delta, r_delta, count[r_delta + 1][c_delta + 1]) || success;
+        }
+    }
+    return success;
+}
+
+bool can_place(vector<vector<char>> &cell, char ally_symbol, char rival_symbol)
+{
+    for (int row = 1; row <= NUM; row++)
+    {
+        for (int col = 1; col <= NUM; col++)
+        {
+            vector<vector<int>> count = count_all_directions(cell, col, row, ally_symbol, rival_symbol);
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    if (count[j][i] > 0)
+                        return true;
+                }
             }
         }
-        cout << endl;
-        cout << "  ---------------------------------" << endl;
     }
+    return false;
+}
 
-    cout << endl;
+void display(std::vector<std::vector<char>> cell)
+{
+    string show;
+    vector<std::string> row;
+    std::transform(std::begin(cell[0]), std::end(cell[0]), std::back_inserter(row),
+                   [](char c) { return std::string() + c; });
+    show += join(row, "   ");
+    show += "\n";
+    show += "  ---------------------------------\n";
+
+    for (int i = 1; i <= NUM; i++)
+    {
+        vector<std::string> row;
+        std::transform(std::begin(cell[i]), std::end(cell[i]), std::back_inserter(row),
+                       [](char c) { return std::string() + c; });
+        show += join(row, " | ");
+        show += "\n";
+        show += "  ---------------------------------\n";
+    }
+    show += "\n";
+    cout << show;
 }
 
 int main()
@@ -57,15 +158,17 @@ int main()
     cout << endl;
 
     /* 初期状態設定 */
-    char cell[NUM + 1][NUM + 1];
+    std::vector<std::vector<char>> cell(NUM + 1, std::vector<char>(NUM + 1, ' '));
+    // char cell[NUM + 1][NUM + 1];
+    // std::fill(cell[0], cell[NUM + 1], ' ');
 
-    for (int i = 1; i <= NUM; i++)
+    for (int i = 0; i <= NUM; i++)
     {
-        for (int j = 1; j <= NUM; j++)
-        {
-            cell[i][j] = 'n';
-        }
+        cell[0][i] = '0' + i;
+        cell[i][0] = '0' + i;
     }
+    cell[0][0] = ' ';
+
     cell[4][4] = 'o';
     cell[5][5] = 'o';
     cell[4][5] = 'x';
@@ -82,7 +185,7 @@ int main()
         cout << endl;
 
         /* 更新済み状態表示 */
-        hyouji(cell);
+        display(cell);
 
         /* ターン表示 */
         if (active_player == true)
@@ -96,237 +199,47 @@ int main()
         cout << endl;
 
         /* 敵味方設定 */
-        char ally;
-        char enemy;
+        char ally_symbol;
+        char rival_symbol;
 
         if (active_player == true)
         {
-            ally = 'o';
-            enemy = 'x';
+            ally_symbol = 'o';
+            rival_symbol = 'x';
         }
         else
         {
-            ally = 'x';
-            enemy = 'o';
+            ally_symbol = 'x';
+            rival_symbol = 'o';
         }
 
         /* 入力マス設定 */
-        int i_sel;
-        int j_sel;
+        int col;
+        int row;
 
-        cout << "Please select a cell (i, j)." << endl;
+        cout << "Please select a cell (col, row)." << endl;
 
-        bool error = true;
+        bool success = false;
 
-        while (error == true)
+        while (!success)
         {
-            cout << "i j --> ";
-            cin >> i_sel >> j_sel;
+            cout << "(col, row) --> ";
+            cin >> col >> row;
 
-            if (cell[i_sel][j_sel] == 'n')
-            {
-                /* サーチ */
-
-                /* 右サーチ */
-                if (j_sel < NUM - 1)
-                {
-                    for (int k = 1; k <= (NUM - j_sel); k++)
-                    {
-                        if (cell[i_sel][j_sel + k] == 'n')
-                        {
-                            break;
-                        }
-                        else if ((cell[i_sel][j_sel + k] == ally) && (k != 1))
-                        {
-                            error = false;
-
-                            for (int k_change = 1; k_change < k; k_change++)
-                            {
-                                cell[i_sel][j_sel + k_change] = ally;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                /* 左サーチ */
-                if (j_sel > 2)
-                {
-                    for (int k = 1; k <= (j_sel - 1); k++)
-                    {
-                        if (cell[i_sel][j_sel - k] == 'n')
-                        {
-                            break;
-                        }
-                        else if ((cell[i_sel][j_sel - k] == ally) && (k != 1))
-                        {
-                            error = false;
-
-                            for (int k_change = 1; k_change < k; k_change++)
-                            {
-                                cell[i_sel][j_sel - k_change] = ally;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                /* 下サーチ */
-                if (i_sel < NUM - 1)
-                {
-                    for (int k = 1; k <= (NUM - i_sel); k++)
-                    {
-                        if (cell[i_sel + k][j_sel] == 'n')
-                        {
-                            break;
-                        }
-                        else if ((cell[i_sel + k][j_sel] == ally) && (k != 1))
-                        {
-                            error = false;
-
-                            for (int k_change = 1; k_change < k; k_change++)
-                            {
-                                cell[i_sel + k_change][j_sel] = ally;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                /* 上サーチ */
-                if (i_sel > 2)
-                {
-                    for (int k = 1; k <= (i_sel - 1); k++)
-                    {
-                        if (cell[i_sel - k][j_sel] == 'n')
-                        {
-                            break;
-                        }
-                        else if ((cell[i_sel - k][j_sel] == ally) && (k != 1))
-                        {
-                            error = false;
-
-                            for (int k_change = 1; k_change < k; k_change++)
-                            {
-                                cell[i_sel - k_change][j_sel] = ally;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                /* 右下サーチ */
-                if (!((i_sel > NUM - 2) || (j_sel > NUM - 2)))
-                {
-                    for (int k = 1; k <= min(NUM - i_sel, NUM - j_sel); k++)
-                    {
-                        if (cell[i_sel + k][j_sel + k] == 'n')
-                        {
-                            break;
-                        }
-                        else if ((cell[i_sel + k][j_sel + k] == ally) && (k != 1))
-                        {
-
-                            error = false;
-
-                            for (int k_change = 1; k_change < k; k_change++)
-                            {
-                                cell[i_sel + k_change][j_sel + k_change] = ally;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                /* 右上サーチ */
-                if (!((i_sel < 2) || (j_sel > NUM - 2)))
-                {
-                    for (int k = 1; k <= min(i_sel - 1, NUM - j_sel); k++)
-                    {
-                        if (cell[i_sel - k][j_sel + k] == 'n')
-                        {
-                            break;
-                        }
-                        else if ((cell[i_sel - k][j_sel + k] == ally) && (k != 1))
-                        {
-                            error = false;
-
-                            for (int k_change = 1; k_change < k; k_change++)
-                            {
-                                cell[i_sel - k_change][j_sel + k_change] = ally;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                /* 左下サーチ */
-                if (!((i_sel > NUM - 2) || (j_sel < 2)))
-                {
-                    for (int k = 1; k <= min(NUM - i_sel, j_sel - 1); k++)
-                    {
-                        if (cell[i_sel + k][j_sel - k] == 'n')
-                        {
-                            break;
-                        }
-                        else if ((cell[i_sel + k][j_sel - k] == ally) && (k != 1))
-                        {
-                            error = false;
-
-                            for (int k_change = 1; k_change < k; k_change++)
-                            {
-                                cell[i_sel + k_change][j_sel - k_change] = ally;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                /* 左上サーチ */
-                if (!((i_sel < 2) || (j_sel < 2)))
-                {
-                    for (int k = 1; k <= min(i_sel - 1, j_sel - 1); k++)
-                    {
-                        if (cell[i_sel - k][j_sel - k] == 'n')
-                        {
-                            break;
-                        }
-                        else if ((cell[i_sel - k][j_sel - k] == ally) && (k != 1))
-                        {
-                            error = false;
-
-                            for (int k_change = 1; k_change < k; k_change++)
-                            {
-                                cell[i_sel - k_change][j_sel - k_change] = ally;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
+            success = set_all_directions(cell, col, row, ally_symbol, rival_symbol,
+                                         count_all_directions(cell, col, row, ally_symbol, rival_symbol));
 
             /* エラーチェック */
-            if (error == true)
+            if (!success)
             {
                 cout << "Error! Please select again." << endl;
             }
-            else
-            {
-                cell[i_sel][j_sel] = ally;
-            }
         } //1ターン終了
 
-        /* 終了・ターン判定 */
+        /* TODO 終了・ターン判定 */
 
         /* ターン更新 */
-        if (active_player == true)
-        {
-            active_player = false;
-        }
-        else
-        {
-            active_player = true;
-        }
+        active_player = !active_player;
 
         /* ターン更新 */
         lap++;
@@ -354,19 +267,16 @@ int main()
         }
     }
 
-    hyouji(cell);
+    display(cell);
 
-    if (o_count > x_count)
+    if (o_count != x_count)
     {
-        cout << player_o << " win!" << endl;
-    }
-    else if (x_count > o_count)
-    {
-        cout << player_x << " win!" << endl;
+        string winner = o_count > x_count ? player_o : player_x;
+        cout << winner << " wins!" << endl;
     }
     else
     {
-        cout << "hikiwake!" << endl;
+        cout << "draw" << endl;
     }
 
     return 0;
