@@ -12,20 +12,20 @@ std::string join(const vector<string> &vec, const char *delim)
     return res.str();
 }
 
-int check(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol, int x_delta, int y_delta)
+int check(char (&cell)[NUM + 1][NUM + 1], int col, int row, char ally_symbol, char rival_symbol, int c_delta, int r_delta)
 {
-    if (cell[i_sel][j_sel] != ' ')
+    if (cell[row][col] != ' ')
         return -1;
 
-    int i = i_sel + y_delta;
-    int j = j_sel + x_delta;
+    int c = col + c_delta;
+    int r = row + r_delta;
     int count = 0;
-    while ((1 <= j && j <= NUM) && (1 <= i && i <= NUM))
+    while ((1 <= r && r <= NUM) && (1 <= c && c <= NUM))
     {
-        if (cell[i][j] != rival_symbol)
+        if (cell[r][c] != rival_symbol)
         {
             // at least 1 rival symbol must appear
-            if (cell[i][j] == ally_symbol && count > 0)
+            if (cell[r][c] == ally_symbol && count > 0)
             {
                 return count;
             }
@@ -34,55 +34,53 @@ int check(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol
         }
 
         count++;
-        i += y_delta;
-        j += x_delta;
+        c += c_delta;
+        r += r_delta;
     }
     return -1;
 }
 
-bool try_and_set_direction(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol, int x_delta, int y_delta)
+bool try_and_set_direction(char (&cell)[NUM + 1][NUM + 1], int col, int row, char ally_symbol, char rival_symbol, int c_delta, int r_delta)
 {
-    int count = check(cell, i_sel, j_sel, ally_symbol, rival_symbol, x_delta, y_delta);
+    int count = check(cell, col, row, ally_symbol, rival_symbol, c_delta, r_delta);
 
     if (count < 0)
     {
         return false;
     }
 
-    int i = i_sel;
-    int j = j_sel;
     for (int k = 1; k <= count; k++)
     {
-        cell[i + k * y_delta][j + k * x_delta] = ally_symbol;
+        cell[row + k * r_delta][col + k * c_delta] = ally_symbol;
     }
     return true;
 }
 
-bool try_and_set(char (&cell)[NUM + 1][NUM + 1], int i_sel, int j_sel, char ally_symbol, char rival_symbol)
+bool try_and_set(char (&cell)[NUM + 1][NUM + 1], int col, int row, char ally_symbol, char rival_symbol)
 {
-    if (cell[i_sel][j_sel] != ' ')
+    if (cell[row][col] != ' ')
     {
-        return true;
+        return false;
     }
 
     /* サーチ */
     bool success = false;
 
-    for (int x_delta = -1; x_delta <= 1; x_delta++)
+    for (int r_delta = -1; r_delta <= 1; r_delta++)
     {
-        for (int y_delta = -1; y_delta <= 1; y_delta++)
+        for (int c_delta = -1; c_delta <= 1; c_delta++)
         {
-            if (x_delta == 0 && y_delta == 0)
+            if (r_delta == 0 && c_delta == 0)
             {
                 continue;
             }
-            success = try_and_set_direction(cell, i_sel, j_sel, ally_symbol, rival_symbol, x_delta, y_delta) || success;
+            success = try_and_set_direction(cell, col, row, ally_symbol, rival_symbol, c_delta, r_delta) || success;
         }
     }
 
     if (success)
     {
-        cell[i_sel][j_sel] = ally_symbol;
+        cell[row][col] = ally_symbol;
     }
 
     return success;
@@ -181,42 +179,31 @@ int main()
         }
 
         /* 入力マス設定 */
-        int i_sel;
-        int j_sel;
+        int col;
+        int row;
 
-        cout << "Please select a cell (i, j)." << endl;
+        cout << "Please select a cell (col, row)." << endl;
 
         bool success = false;
 
         while (!success)
         {
-            cout << "i j --> ";
-            cin >> i_sel >> j_sel;
+            cout << "(col, row) --> ";
+            cin >> col >> row;
 
-            success = try_and_set(cell, i_sel, j_sel, ally_symbol, rival_symbol);
+            success = try_and_set(cell, col, row, ally_symbol, rival_symbol);
 
             /* エラーチェック */
             if (!success)
             {
                 cout << "Error! Please select again." << endl;
             }
-            else
-            {
-                cell[i_sel][j_sel] = ally_symbol;
-            }
         } //1ターン終了
 
-        /* 終了・ターン判定 */
+        /* TODO 終了・ターン判定 */
 
         /* ターン更新 */
-        if (active_player == true)
-        {
-            active_player = false;
-        }
-        else
-        {
-            active_player = true;
-        }
+        active_player = !active_player;
 
         /* ターン更新 */
         lap++;
@@ -246,17 +233,14 @@ int main()
 
     display(cell);
 
-    if (o_count > x_count)
+    if (o_count != x_count)
     {
-        cout << player_o << " win!" << endl;
-    }
-    else if (x_count > o_count)
-    {
-        cout << player_x << " win!" << endl;
+        string winner = o_count > x_count ? player_o : player_x;
+        cout << winner << " wins!" << endl;
     }
     else
     {
-        cout << "hikiwake!" << endl;
+        cout << "draw" << endl;
     }
 
     return 0;
