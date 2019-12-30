@@ -1,45 +1,38 @@
-#include <iostream>
-#include <cmath>
-#include <string>
+#include <bits/stdc++.h>
 
 #define NUM 8
 
 using namespace std;
 
+// TODO template
+std::string join(const vector<string> &vec, const char *delim)
+{
+    stringstream res;
+    copy(vec.begin(), vec.end(), ostream_iterator<string>(res, delim));
+    return res.str();
+}
+
 void hyouji(char cell[NUM + 1][NUM + 1])
 {
-    cout << "    ";
+    string show;
+    vector<std::string> row;
+    std::transform(std::begin(cell[0]), std::end(cell[0]), std::back_inserter(row),
+                       [](char c) { return std::string() + c; });
+    show += join(row, "   ");
+    show += "\n";
+    show += "  ---------------------------------\n";
+
     for (int i = 1; i <= NUM; i++)
     {
-        cout << i << "   ";
+        vector<std::string> row;
+        std::transform(std::begin(cell[i]), std::end(cell[i]), std::back_inserter(row),
+                       [](char c) { return std::string() + c; });
+        show += join(row, " | ");
+        show += "\n";
+        show += "  ---------------------------------\n";
     }
-    cout << endl;
-
-    cout << "  ---------------------------------" << endl;
-
-    for (int i = 1; i <= NUM; i++)
-    {
-        cout << i << " |";
-        for (int j = 1; j <= NUM; j++)
-        {
-            if (cell[i][j] == 'o')
-            {
-                cout << " o |";
-            }
-            else if (cell[i][j] == 'x')
-            {
-                cout << " x |";
-            }
-            else
-            {
-                cout << "   |";
-            }
-        }
-        cout << endl;
-        cout << "  ---------------------------------" << endl;
-    }
-
-    cout << endl;
+    show += "\n";
+    cout << show;
 }
 
 int main()
@@ -58,14 +51,15 @@ int main()
 
     /* 初期状態設定 */
     char cell[NUM + 1][NUM + 1];
+    std::fill(cell[0], cell[NUM + 1], ' ');
 
-    for (int i = 1; i <= NUM; i++)
+    for (int i = 0; i <= NUM; i++)
     {
-        for (int j = 1; j <= NUM; j++)
-        {
-            cell[i][j] = 'n';
-        }
+        cell[0][i] = '0' + i;
+        cell[i][0] = '0' + i;
     }
+    cell[0][0] = ' ';
+
     cell[4][4] = 'o';
     cell[5][5] = 'o';
     cell[4][5] = 'x';
