@@ -49,38 +49,76 @@ string get_binary_code_str(int n, int size)
 
 string get_text()
 {
-    std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/satellite_abstract.txt");
+    //    std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/satellite_abstract.txt");
+    std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/low_entropy.txt");
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     return str;
 }
 
-void compression_coding_allocator(multimap<int, char> char_count_reverse, unordered_map<char, string> &haffman_allocation)
+void haffman_code_allocator_allocate_sum_side_1(unordered_map<char, string> &haffman_allocation, vector<char> char_list, int depth)
 {
-    int comparison = 0;
-    for (auto it = char_count_reverse.begin(); it != prev(char_count_reverse.end()); it++)
+    // sum側(すでに符号を割り当てているすべての文字)の割り当て符号は、その末尾に1を追加したものに置き換える
+    for (int j = 0; j < depth - 1; j++)
     {
-        haffman_allocation.insert(make_pair((*it).second, ""));
+        haffman_allocation.at(char_list.at(j)) += '1';
+    }
+    // next char側の割り当て符号を0にする
+    haffman_allocation.insert(make_pair(char_list.at(depth), "0"));
+}
 
-        haffman_allocation.at((*it).second) += '1';
+void haffman_code_allocator_allocate_sum_side_0(unordered_map<char, string> &haffman_allocation, vector<char> char_list, int depth)
+{
+    // sum側(すでに符号を割り当てているすべての文字)の割り当て符号は、その末尾に0を追加したものに置き換える
+    for (int j = 0; j < depth - 1; j++)
+    {
+        haffman_allocation.at(char_list.at(j)) += '0';
+    }
+    // next char側の割り当て符号を1にする
+    haffman_allocation.insert(make_pair(char_list.at(depth), "1"));
+}
 
-        if ((*it).first + comparison <= (*(next(it))).first)
+void compression_coding_allocator(unordered_map<char, int> char_count, unordered_map<char, string> &haffman_allocation)
+{
+    // FIXME ラムダ式でchar_countから直接char_listを生成する
+    // つまり、multimapを使わない方法にする
+
+    // sortのためchar_countのvalueをkeyとするmultimapを作る
+    multimap<int, char> char_count_reverse;
+    for (auto char_count_pair : char_count)
+    {
+        char_count_reverse.insert(make_pair(char_count_pair.second, char_count_pair.first));
+    }
+
+    // 出現回数順(昇順)に文字を格納したvector型の変数を作成
+    vector<char> char_list;
+    for (auto char_count_reverse_pair : char_count_reverse)
+    {
+        char_list.emplace_back(char_count_reverse_pair.second);
+    }
+
+    // 出現回数が最も小さい文字と2番目に小さい文字である、char_listの先頭2文字を取り出す
+    // のちにより出現回数が大きい文字の出現回数と比較するため、和をsumに格納する
+    int freq_sum = char_count.at(char_list.at(0)) + char_count.at(char_list.at(1));
+    haffman_allocation.insert(make_pair(char_list.at(0), "1"));
+    haffman_allocation.insert(make_pair(char_list.at(1), "0"));
+
+    // 文字の出現回数でトーナメント表を作り、出現回数が多いほうの文字に符号0を、少ないほうの文字に符号1を割り当てる
+    // FIXME 木なので再帰構造に書き換える
+    for (int i = 2; i < char_list.size(); i++)
+    {
+        int next_char_freq = char_count.at(char_list.at(i));
+
+        // FIXME 関数haffman_code_allocator_allocate_sum_side_0とhaffman_code_allocator_allocate_sum_side_1を統合
+        if (freq_sum <= next_char_freq)
         {
-            for (auto it2 = char_count_reverse.begin(); it2 != it; it2++)
-            {
-                haffman_allocation.at((*it2).second) += '0';
-            }
-            haffman_allocation.at((*(next(it))).second) += '1';
+            haffman_code_allocator_allocate_sum_side_0(haffman_allocation, char_list, i);
         }
         else
         {
-            for (auto it2 = char_count_reverse.begin(); it2 != it; it2++)
-            {
-                haffman_allocation.at((*it2).second) += '1';
-            }
-            haffman_allocation.at((*(next(it))).second) += '0';
+            haffman_code_allocator_allocate_sum_side_1(haffman_allocation, char_list, i);
         }
 
-        comparison = (*it).first + (*(next(it))).first;
+        freq_sum += next_char_freq;
     }
 }
 
@@ -113,20 +151,13 @@ int main()
         char_set.emplace(c);
     }
 
-    // sortのためchar_countのvalueをkeyとするmultimapを作る
-    multimap<int, char> char_count_reverse;
-    for (auto char_count_pair : char_count)
-    {
-        char_count_reverse.insert(make_pair(char_count_pair.second, char_count_pair.first));
-    }
-
     // 順番に割り当てる
     unordered_map<char, string> ordinal_allocation;
     ordinal_coding_allocator(char_set, ordinal_allocation);
 
     // 圧縮コードの割り当て
     unordered_map<char, string> haffman_allocation;
-    compression_coding_allocator(char_count_reverse, haffman_allocation);
+    compression_coding_allocator(char_count, haffman_allocation);
 
     // 符号化
     string ordinal_coding;
@@ -134,10 +165,10 @@ int main()
     for (auto c : file_txt)
     {
         ordinal_coding += ordinal_allocation.at(c);
-        haffman_coding += ordinal_allocation.at(c);
+        haffman_coding += haffman_allocation.at(c);
     }
 
-    double compression_rate = haffman_coding.length() / ordinal_coding.length();
+    double compression_rate = (double)haffman_coding.length() / (double)ordinal_coding.length();
     cout << compression_rate << endl;
 
     return 0;
