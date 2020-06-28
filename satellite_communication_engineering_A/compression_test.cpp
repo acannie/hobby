@@ -54,7 +54,7 @@ string get_text()
     return str;
 }
 
-void compression_coding_allocation(multimap<int, char> char_count_reverse, unordered_map<char, string> &haffman_allocation)
+void compression_coding_allocator(multimap<int, char> char_count_reverse, unordered_map<char, string> &haffman_allocation)
 {
     int comparison = 0;
     for (auto it = char_count_reverse.begin(); it != prev(char_count_reverse.end()); it++)
@@ -81,6 +81,16 @@ void compression_coding_allocation(multimap<int, char> char_count_reverse, unord
         }
 
         comparison = (*it).first + (*(next(it))).first;
+    }
+}
+
+void ordinal_coding_allocator(unordered_set<char> char_set, unordered_map<char, string> &ordinal_allocation)
+{
+    int n = 0;
+    for (auto c : char_set)
+    {
+        ordinal_allocation.emplace(make_pair(c, get_binary_code_str(n, char_set.size())));
+        n++;
     }
 }
 
@@ -112,16 +122,11 @@ int main()
 
     // 順番に割り当てる
     unordered_map<char, string> ordinal_allocation;
-    int n = 0;
-    for (auto c : char_set)
-    {
-        ordinal_allocation.emplace(make_pair(c, get_binary_code_str(n, char_set.size())));
-        n++;
-    }
+    ordinal_coding_allocator(char_set, ordinal_allocation);
 
     // 圧縮コードの割り当て
     unordered_map<char, string> haffman_allocation;
-    compression_coding_allocation(char_count_reverse, haffman_allocation);
+    compression_coding_allocator(char_count_reverse, haffman_allocation);
 
     // 符号化
     string ordinal_coding;
