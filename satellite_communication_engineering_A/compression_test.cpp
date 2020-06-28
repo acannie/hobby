@@ -12,6 +12,17 @@ int get_digit(int n)
     return digit;
 }
 
+int get_digit_binary(int n)
+{
+    int digit = 0;
+    while (n > 0)
+    {
+        n /= 2;
+        digit++;
+    }
+    return digit;
+}
+
 string get_binary_code_str(int n, int size)
 {
     int binary_code = 0;
@@ -22,53 +33,74 @@ string get_binary_code_str(int n, int size)
     }
 
     string binary_code_str;
+    int loop_count = get_digit_binary(size) - get_digit(binary_code);
 
-    for (int i = 0; i < size - get_digit(binary_code); i++)
+    for (int i = 0; i < loop_count; i++)
     {
         binary_code_str += '0';
     }
 
-    binary_code_str += to_string(binary_code);
-
+    if (get_digit(binary_code) != 0)
+    {
+        binary_code_str += to_string(binary_code);
+    }
     return binary_code_str;
+}
+
+string get_text()
+{
+    std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/satellite_abstract.txt");
+    std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+    return str;
+}
+
+void compression_coding_allocation(multimap<int, char> char_count_reverse, unordered_map<char, string> &haffman_allocation)
+{
+    int comparison = 0;
+    for (auto it = char_count_reverse.begin(); it != prev(char_count_reverse.end()); it++)
+    {
+        haffman_allocation.insert(make_pair((*it).second, ""));
+
+        haffman_allocation.at((*it).second) += '1';
+
+        if ((*it).first + comparison <= (*(next(it))).first)
+        {
+            for (auto it2 = char_count_reverse.begin(); it2 != it; it2++)
+            {
+                haffman_allocation.at((*it2).second) += '0';
+            }
+            haffman_allocation.at((*(next(it))).second) += '1';
+        }
+        else
+        {
+            for (auto it2 = char_count_reverse.begin(); it2 != it; it2++)
+            {
+                haffman_allocation.at((*it2).second) += '1';
+            }
+            haffman_allocation.at((*(next(it))).second) += '0';
+        }
+
+        comparison = (*it).first + (*(next(it))).first;
+    }
 }
 
 int main()
 {
-    // fileの読み込み
-    ifstream ifs("satellite_abstract.txt");
-    if (ifs.fail())
-    {
-        cerr << "Failed to open file." << endl;
-        return -1;
-    }
+    string file_txt = get_text();
 
-    string input_str;
-    vector<string> txt_data;
-    while (getline(ifs, input_str))
-    {
-        txt_data.emplace_back(input_str);
-    }
-
-    // 各文字の出現回数カウント、文字のset作成
+    //各文字の出現回数カウント、文字のset作成
     unordered_map<char, int> char_count;
     unordered_set<char> char_set;
-    int total_txt_len = 0;
 
-    for (auto str : txt_data)
+    for (auto c : file_txt)
     {
-        total_txt_len += str.length();
-
-        for (auto c : str)
+        if (char_count.find(c) == char_count.end())
         {
-            if (char_count.find(c) == char_count.end())
-            {
-                char_count.insert(make_pair(c, 0));
-            }
-
-            char_count.at(c)++;
-            char_set.emplace(c);
+            char_count.insert(make_pair(c, 0));
         }
+
+        char_count.at(c)++;
+        char_set.emplace(c);
     }
 
     // sortのためchar_countのvalueをkeyとするmultimapを作る
@@ -78,64 +110,30 @@ int main()
         char_count_reverse.insert(make_pair(char_count_pair.second, char_count_pair.first));
     }
 
-    // 一般的な割り当て
-    unordered_map<char, string> common_allocation;
+    // 順番に割り当てる
+    unordered_map<char, string> ordinal_allocation;
     int n = 0;
     for (auto c : char_set)
     {
-        common_allocation.emplace(make_pair(c, get_binary_code_str(n, char_set.size())));
+        ordinal_allocation.emplace(make_pair(c, get_binary_code_str(n, char_set.size())));
         n++;
     }
 
     // 圧縮コードの割り当て
     unordered_map<char, string> haffman_allocation;
-    int comparison = 0;
-    for (auto it = char_count_reverse.begin(); it != char_count_reverse.end() - 1; it++)
-    {
-        haffman_allocation.insert(make_pair((*it).second, ""));
-        if ((*it).first + comparison <= (*(it + 1)).first)
-        {
-            for(auto it2 = char_count_reverse.begin(); it2 != it; it2++){
-                haffman_allocation.at((*it2).second) += '0';
-            }
-            haffman_allocation.at((*it + 1).second) += '1';
-        }
-        else
-        {
-            for(auto it2 = char_count_reverse.begin(); it2 != it; it2++){
-                haffman_allocation.at((*it2).second) += '1';
-            }
-            haffman_allocation.at((*it + 1).second) += '0';
-        }
-
-        comparison = (*it).first + (*(it + 1)).first;
-    }
+    compression_coding_allocation(char_count_reverse, haffman_allocation);
 
     // 符号化
-    string common_coding;
+    string ordinal_coding;
     string haffman_coding;
-    for (auto str : txt_data)
+    for (auto c : file_txt)
     {
-        for (auto c : str)
-        {
-            common_coding += common_allocation.at(c);
-            haffman_coding += common_allocation.at(c);
-        }
+        ordinal_coding += ordinal_allocation.at(c);
+        haffman_coding += ordinal_allocation.at(c);
     }
 
-    double compression_rate = haffman_coding.length() / common_coding.length();
+    double compression_rate = haffman_coding.length() / ordinal_coding.length();
     cout << compression_rate << endl;
 
     return 0;
-
-    // FILE *input_txt_file;
-    // char file_name[] = "satellite_abstract.txt";
-
-    // input_txt_file = fopen(file_name, "r");
-
-    // if (input_txt_file == NULL)
-    // {
-    //     cout << "cannot open the file: " << file_name << endl;
-    //     return 0;
-    // }
 }
