@@ -49,8 +49,9 @@ string get_binary_code_str(int n, int size)
 
 string get_text()
 {
-    //    std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/satellite_abstract.txt");
-    std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/low_entropy.txt");
+    // std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/satellite_abstract.txt");
+    // std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/low_entropy.txt");
+    std::ifstream t("/home/acannie/github/hobby/satellite_communication_engineering_A/high_entropy.txt");
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     return str;
 }
@@ -58,7 +59,7 @@ string get_text()
 void haffman_code_allocator_allocate_sum_side_1(unordered_map<char, string> &haffman_allocation, vector<char> char_list, int depth)
 {
     // sum側(すでに符号を割り当てているすべての文字)の割り当て符号は、その末尾に1を追加したものに置き換える
-    for (int j = 0; j < depth - 1; j++)
+    for (int j = 0; j < depth; j++)
     {
         haffman_allocation.at(char_list.at(j)) += '1';
     }
@@ -69,7 +70,7 @@ void haffman_code_allocator_allocate_sum_side_1(unordered_map<char, string> &haf
 void haffman_code_allocator_allocate_sum_side_0(unordered_map<char, string> &haffman_allocation, vector<char> char_list, int depth)
 {
     // sum側(すでに符号を割り当てているすべての文字)の割り当て符号は、その末尾に0を追加したものに置き換える
-    for (int j = 0; j < depth - 1; j++)
+    for (int j = 0; j < depth; j++)
     {
         haffman_allocation.at(char_list.at(j)) += '0';
     }
@@ -111,11 +112,11 @@ void compression_coding_allocator(unordered_map<char, int> char_count, unordered
         // FIXME 関数haffman_code_allocator_allocate_sum_side_0とhaffman_code_allocator_allocate_sum_side_1を統合
         if (freq_sum <= next_char_freq)
         {
-            haffman_code_allocator_allocate_sum_side_0(haffman_allocation, char_list, i);
+            haffman_code_allocator_allocate_sum_side_1(haffman_allocation, char_list, i);
         }
         else
         {
-            haffman_code_allocator_allocate_sum_side_1(haffman_allocation, char_list, i);
+            haffman_code_allocator_allocate_sum_side_0(haffman_allocation, char_list, i);
         }
 
         freq_sum += next_char_freq;
@@ -130,6 +131,18 @@ void ordinal_coding_allocator(unordered_set<char> char_set, unordered_map<char, 
         ordinal_allocation.emplace(make_pair(c, get_binary_code_str(n, char_set.size())));
         n++;
     }
+}
+
+double get_entropy(unordered_map<char, int> char_count, int txt_file_size)
+{
+    double entropy = 0;
+
+    for (auto char_count_pair : char_count)
+    {
+        double appearance_probability = (double)char_count_pair.second / (double)txt_file_size;
+        entropy += -appearance_probability * log2(appearance_probability);
+    }
+    return entropy;
 }
 
 int main()
@@ -168,8 +181,8 @@ int main()
         haffman_coding += haffman_allocation.at(c);
     }
 
-    double compression_rate = (double)haffman_coding.length() / (double)ordinal_coding.length();
-    cout << compression_rate << endl;
+    cout << "the entropy is " << get_entropy(char_count, file_txt.length()) << endl;
+    cout << "the compression rate is " << (double)haffman_coding.length() / (double)ordinal_coding.length() << endl;
 
     return 0;
 }
