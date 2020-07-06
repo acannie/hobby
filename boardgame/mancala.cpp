@@ -16,7 +16,7 @@ void input_name(vector<string> &player_names, int player_num)
 }
 
 //TODO bufの名前変更
-void display(vector<string> player, vector<vector<int>> space, int buf1, int buf2)
+void display(vector<string> player, vector<vector<int>> hole_statuses, int special_hole_1, int special_hole_2)
 {
     cout << "-----------------------------" << endl;
     cout << "| player: " << player.at(0);
@@ -30,9 +30,9 @@ void display(vector<string> player, vector<vector<int>> space, int buf1, int buf
     cout << "|                           |" << endl;
 
     cout << "|       3     2     1       |" << endl;
-    cout << "|      [" << space.at(0).at(2) << "]   [" << space.at(0).at(1) << "]   [" << space.at(0).at(0) << "]      |" << endl;
-    cout << "| [" << buf1 << "]                   [" << buf2 << "] |" << endl;
-    cout << "|      [" << space.at(1).at(0) << "]   [" << space.at(1).at(1) << "]   [" << space.at(1).at(2) << "]      |" << endl;
+    cout << "|      [" << hole_statuses.at(0).at(2) << "]   [" << hole_statuses.at(0).at(1) << "]   [" << hole_statuses.at(0).at(0) << "]      |" << endl;
+    cout << "| [" << special_hole_1 << "]                   [" << special_hole_2 << "] |" << endl;
+    cout << "|      [" << hole_statuses.at(1).at(0) << "]   [" << hole_statuses.at(1).at(1) << "]   [" << hole_statuses.at(1).at(2) << "]      |" << endl;
     cout << "|       1     2     3       |" << endl;
 
     cout << "|                           |" << endl;
@@ -62,18 +62,18 @@ int main()
     cout << endl;
 
     /* ボードの初期状態を設定 */
-    vector<vector<int>> space;
+    vector<vector<int>> hole_statuses;
     for (int p = 0; p < player_num; p++)
     {
-        space.emplace_back(0);
+        hole_statuses.emplace_back(0);
         for (int s = 0; s < hole_num; s++)
         {
-            space.at(p).emplace_back(first_stone_num);
+            hole_statuses.at(p).emplace_back(first_stone_num);
         }
     }
 
-    int buf1 = 0;
-    int buf2 = 0;
+    int special_hole_1 = 0;
+    int special_hole_2 = 0;
 
     /* 先手の設定 */
     int active_player = 0;
@@ -89,7 +89,7 @@ int main()
         cout << endl;
 
         /* 状態表示 */
-        display(player_names, space, buf1, buf2);
+        display(player_names, hole_statuses, special_hole_1, special_hole_2);
 
         cout << player_names.at(active_player) << "'s turn." << endl;
 
@@ -104,7 +104,7 @@ int main()
             {
                 cout << "Input number 1 to 3. --> ";
             }
-            else if (space.at(active_player).at(sow - 1) == 0)
+            else if (hole_statuses.at(active_player).at(sow - 1) == 0)
             {
                 cout << "No stone there. Input again. --> ";
             }
@@ -116,46 +116,46 @@ int main()
         }
 
         /* 状態を更新 */
-        int stone_num = space.at(active_player).at(sow - 1);
+        int stone_num = hole_statuses.at(active_player).at(sow - 1);
         int *now_operate_place;
-        now_operate_place = &space.at(active_player).at(sow - 1);
+        now_operate_place = &hole_statuses.at(active_player).at(sow - 1);
 
-        space.at(active_player).at(sow - 1) = 0;
+        hole_statuses.at(active_player).at(sow - 1) = 0;
 
         for (int i = 0; i < stone_num; i++)
         {
             // FIXME
-            if (now_operate_place == &space.at(0).at(0))
+            if (now_operate_place == &hole_statuses.at(0).at(0))
             {
-                now_operate_place = &space.at(0).at(1);
+                now_operate_place = &hole_statuses.at(0).at(1);
             }
-            else if (now_operate_place == &space.at(0).at(1))
+            else if (now_operate_place == &hole_statuses.at(0).at(1))
             {
-                now_operate_place = &space.at(0).at(2);
+                now_operate_place = &hole_statuses.at(0).at(2);
             }
-            else if (now_operate_place == &space.at(0).at(2))
+            else if (now_operate_place == &hole_statuses.at(0).at(2))
             {
-                now_operate_place = &buf1;
+                now_operate_place = &special_hole_1;
             }
-            else if (now_operate_place == &buf1)
+            else if (now_operate_place == &special_hole_1)
             {
-                now_operate_place = &space.at(1).at(0);
+                now_operate_place = &hole_statuses.at(1).at(0);
             }
-            else if (now_operate_place == &space.at(1).at(0))
+            else if (now_operate_place == &hole_statuses.at(1).at(0))
             {
-                now_operate_place = &space.at(1).at(1);
+                now_operate_place = &hole_statuses.at(1).at(1);
             }
-            else if (now_operate_place == &space.at(1).at(1))
+            else if (now_operate_place == &hole_statuses.at(1).at(1))
             {
-                now_operate_place = &space.at(1).at(2);
+                now_operate_place = &hole_statuses.at(1).at(2);
             }
-            else if (now_operate_place == &space.at(1).at(2))
+            else if (now_operate_place == &hole_statuses.at(1).at(2))
             {
-                now_operate_place = &buf2;
+                now_operate_place = &special_hole_2;
             }
-            else if (now_operate_place == &buf2)
+            else if (now_operate_place == &special_hole_2)
             {
-                now_operate_place = &space.at(0).at(0);
+                now_operate_place = &hole_statuses.at(0).at(0);
             }
             (*now_operate_place)++;
         }
@@ -166,7 +166,7 @@ int main()
         bool hole_empty = true;
         for (int i = 0; i < hole_num; i++)
         {
-            if (space.at(active_player).at(i) != 0)
+            if (hole_statuses.at(active_player).at(i) != 0)
             {
                 hole_empty = false;
             }
@@ -178,7 +178,7 @@ int main()
             cout << "--- LAST STATE ------------------------------------" << endl;
             cout << endl;
 
-            display(player_names, space, buf1, buf2);
+            display(player_names, hole_statuses, special_hole_1, special_hole_2);
 
             cout << player_names.at(active_player) << " win!" << endl;
 
@@ -188,7 +188,7 @@ int main()
         }
 
         /* 次ターン判定 */
-        if (now_operate_place != &buf1 && now_operate_place != &buf2)
+        if (now_operate_place != &special_hole_1 && now_operate_place != &special_hole_2)
         {
             // active_player を次の人にする(1大きい番号を持つ player)。
             active_player = (active_player + 1) % player_names.size();
