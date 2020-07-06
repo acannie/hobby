@@ -7,7 +7,7 @@ void input_name(vector<string> &player_names, int player_num)
 
     for (int i = 0; i < player_num; i++)
     {
-        cout << "Input player " << i+1 << " name --> ";
+        cout << "Input player " << i + 1 << " name --> ";
         cin >> name;
         player_names.emplace_back(name);
     }
@@ -16,26 +16,77 @@ void input_name(vector<string> &player_names, int player_num)
 }
 
 //TODO bufの名前変更
-void display(vector<string> player, vector<vector<int>> hole_statuses, int special_hole_1, int special_hole_2)
+void display(vector<string> player, vector<vector<int>> hole_statuses, int hole_num, int special_hole_1, int special_hole_2)
 {
-    cout << "-----------------------------" << endl;
-    cout << "| player: " << player.at(0);
+    int frame_width = 17 + (hole_num - 1) * 6;
 
-    //TODO 18が表すもの調査
-    for (int i = 0; i < 18 - player.at(0).length(); i++)
+    // 上枠表示
+    for (int i = 0; i < frame_width; i++)
+    {
+        cout << "-";
+    }
+    cout << endl;
+
+    // player1の名前を表示
+    cout << "| player: " << player.at(0);
+    for (int i = 0; i < frame_width - 11 - player.at(0).length(); i++)
     {
         cout << " ";
     }
     cout << "|" << endl;
-    cout << "|                           |" << endl;
 
-    cout << "|       3     2     1       |" << endl;
-    cout << "|      [" << hole_statuses.at(0).at(2) << "]   [" << hole_statuses.at(0).at(1) << "]   [" << hole_statuses.at(0).at(0) << "]      |" << endl;
+    // 空白行
+    cout << "|";
+    for (int i = 0; i < frame_width - 2; i++)
+    {
+        cout << " ";
+    }
+    cout << "|" << endl;
+
+    // インデックスを表示
+    cout << "|       ";
+    for (int i = 0; i < hole_num; i++)
+    {
+        cout << hole_num - i << "     ";
+    }
+    cout << "  |" << endl;
+
+// player 1 のhole statusを表示
+    cout << "|      ";
+    for (int i = 0; i < hole_num; i++)
+    {
+        cout << "[" << hole_statuses.at(0).at(hole_num - i - 1) << "]   ";
+    }
+    cout << "   |" << endl;
+
+// special holeを表示
     cout << "| [" << special_hole_1 << "]                   [" << special_hole_2 << "] |" << endl;
-    cout << "|      [" << hole_statuses.at(1).at(0) << "]   [" << hole_statuses.at(1).at(1) << "]   [" << hole_statuses.at(1).at(2) << "]      |" << endl;
-    cout << "|       1     2     3       |" << endl;
 
-    cout << "|                           |" << endl;
+// player 2 のhole statusを表示
+    cout << "|      ";
+    for (int i = 0; i < hole_num; i++)
+    {
+        cout << "[" << hole_statuses.at(1).at(i) << "]   ";
+    }
+    cout << "   |" << endl;
+
+    // インデックスを表示
+    cout << "|       ";
+    for (int i = 0; i < hole_num; i++)
+    {
+        cout << i + 1 << "     ";
+    }
+    cout << "  |" << endl;
+
+    // 空白行
+    cout << "|";
+    for (int i = 0; i < frame_width - 2; i++)
+    {
+        cout << " ";
+    }
+    cout << "|" << endl;
+
+    // player2の名前を表示
     cout << "| player: " << player.at(1);
     for (int i = 0; i < 18 - player.at(1).length(); i++)
     {
@@ -43,8 +94,11 @@ void display(vector<string> player, vector<vector<int>> hole_statuses, int speci
     }
     cout << "|" << endl;
 
-    cout << "-----------------------------" << endl;
-
+    // 下枠表示
+    for (int i = 0; i < frame_width; i++)
+    {
+        cout << "-";
+    }
     cout << endl;
 }
 
@@ -89,7 +143,7 @@ int main()
         cout << endl;
 
         /* 状態表示 */
-        display(player_names, hole_statuses, special_hole_1, special_hole_2);
+        display(player_names, hole_statuses, hole_num, special_hole_1, special_hole_2);
 
         cout << player_names.at(active_player) << "'s turn." << endl;
 
@@ -102,7 +156,7 @@ int main()
 
             if (ceil(sow) != floor(sow) || !(1 <= sow && sow <= hole_num))
             {
-                cout << "Input number 1 to 3. --> ";
+                cout << "Input number 1 to " << hole_num << ". --> ";
             }
             else if (hole_statuses.at(active_player).at(sow - 1) == 0)
             {
@@ -178,7 +232,7 @@ int main()
             cout << "--- LAST STATE ------------------------------------" << endl;
             cout << endl;
 
-            display(player_names, hole_statuses, special_hole_1, special_hole_2);
+            display(player_names, hole_statuses, hole_num, special_hole_1, special_hole_2);
 
             cout << player_names.at(active_player) << " win!" << endl;
 
