@@ -1,16 +1,17 @@
 #include <bits/stdc++.h>
-
 using namespace std;
 
-void input_name(vector<string> &player_names)
+void input_name(vector<string> &player_names, int player_num)
 {
     string name;
-    cout << "Input player1 name --> ";
-    cin >> name;
-    player_names.emplace_back(name);
-    cout << "Input player2 name --> ";
-    cin >> name;
-    player_names.emplace_back(name);
+
+    for (int i = 0; i < player_num; i++)
+    {
+        cout << "Input player " << i+1 << " name --> ";
+        cin >> name;
+        player_names.emplace_back(name);
+    }
+
     cout << endl;
 }
 
@@ -50,20 +51,24 @@ void display(vector<string> player, vector<vector<int>> space, int buf1, int buf
 int main()
 {
     /* プレイヤー名の入力 */
-    vector<string> player;
-    input_name(player);
+    vector<string> player_names;
+    int player_num = 2;      // playerの人数
+    int hole_num = 3;        // 穴の数
+    int first_stone_num = 3; // 初期状態における穴一つあたりの石の数
+
+    input_name(player_names, player_num);
 
     cout << "Game Start!" << endl;
     cout << endl;
 
     /* ボードの初期状態を設定 */
     vector<vector<int>> space;
-    for (int p = 0; p < 2; p++)
+    for (int p = 0; p < player_num; p++)
     {
         space.emplace_back(0);
-        for (int s = 0; s < 3; s++)
+        for (int s = 0; s < hole_num; s++)
         {
-            space.at(p).emplace_back(3);
+            space.at(p).emplace_back(first_stone_num);
         }
     }
 
@@ -84,9 +89,9 @@ int main()
         cout << endl;
 
         /* 状態表示 */
-        display(player, space, buf1, buf2);
+        display(player_names, space, buf1, buf2);
 
-        cout << player.at(active_player) << "'s turn." << endl;
+        cout << player_names.at(active_player) << "'s turn." << endl;
 
         /* 自陣のマスを選択 */
         cout << "Select your place --> ";
@@ -95,7 +100,7 @@ int main()
         {
             cin >> sow;
 
-            if ((sow != 1) && (sow != 2) && (sow != 3))
+            if (ceil(sow) != floor(sow) || !(1 <= sow && sow <= hole_num))
             {
                 cout << "Input number 1 to 3. --> ";
             }
@@ -158,15 +163,24 @@ int main()
         cout << endl;
 
         /* 終了判定 */
-        if ((space.at(active_player).at(0) == 0) && (space.at(active_player).at(1) == 0) && (space.at(active_player).at(2) == 0))
+        bool hole_empty = true;
+        for (int i = 0; i < hole_num; i++)
+        {
+            if (space.at(active_player).at(i) != 0)
+            {
+                hole_empty = false;
+            }
+        }
+
+        if (hole_empty)
         {
             /* 終了状態表示 */
             cout << "--- LAST STATE ------------------------------------" << endl;
             cout << endl;
 
-            display(player, space, buf1, buf2);
+            display(player_names, space, buf1, buf2);
 
-            cout << player.at(active_player) << " win!" << endl;
+            cout << player_names.at(active_player) << " win!" << endl;
 
             cout << endl;
 
@@ -177,7 +191,7 @@ int main()
         if (now_operate_place != &buf1 && now_operate_place != &buf2)
         {
             // active_player を次の人にする(1大きい番号を持つ player)。
-            active_player = (active_player + 1) % player.size();
+            active_player = (active_player + 1) % player_names.size();
         }
     }
 
