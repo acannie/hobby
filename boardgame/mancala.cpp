@@ -207,39 +207,6 @@ int main()
             }
 
             hole_statuses.at(operating_hole)++;
-
-            // // FIXME
-            // if (operating_hole == &hole_statuses.at(0).at(0))
-            // {
-            // }
-            // else if (operating_hole == &hole_statuses.at(0).at(1))
-            // {
-            //     operating_hole = &hole_statuses.at(0).at(2);
-            // }
-            // else if (operating_hole == &hole_statuses.at(0).at(2))
-            // {
-            //     operating_hole = &special_hole_1;
-            // }
-            // else if (operating_hole == &special_hole_1)
-            // {
-            //     operating_hole = &hole_statuses.at(1).at(0);
-            // }
-            // else if (operating_hole == &hole_statuses.at(1).at(0))
-            // {
-            //     operating_hole = &hole_statuses.at(1).at(1);
-            // }
-            // else if (operating_hole == &hole_statuses.at(1).at(1))
-            // {
-            //     operating_hole = &hole_statuses.at(1).at(2);
-            // }
-            // else if (operating_hole == &hole_statuses.at(1).at(2))
-            // {
-            //     operating_hole = &special_hole_2;
-            // }
-            // else if (operating_hole == &special_hole_2)
-            // {
-            //     operating_hole = &hole_statuses.at(0).at(0);
-            // }
         }
 
         cout << endl;
