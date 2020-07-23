@@ -5,7 +5,7 @@ void display_welcome();
 void make_deck(vector<pair<string, string>> &deck, vector<string> card_marks, vector<string> card_nums);
 int get_CPU_num(int total_cards_num);
 void hand_out_cards(vector<vector<pair<string, string>>> &players_cards, vector<pair<string, string>> deck, int total_cards_num, int player_num);
-void display_place(vector<vector<pair<string, string>>> player_cards, unordered_map<string, string> correspondence_table,
+void display_place(vector<vector<pair<string, string>>> player_cards,
                    int active_player, vector<string> player_statuses);
 int get_robbed_player(vector<string> player_statuses, int active_player);
 int get_robbed_card_index(vector<vector<pair<string, string>>> players_cards, int active_player, int robbed_player, int player_num);
@@ -18,6 +18,8 @@ void press_enter_to_continue();
 int get_next_active_player(vector<string> player_statuses, int active_player);
 void update_final_status(vector<string> &player_statuses, vector<vector<pair<string, string>>> players_cards);
 
+const unordered_map<string, string> kSymbolTable{{"spade", "♠"}, {"heart", "♥"}, {"club", "♣"}, {"diamond", "♦"}, {"joker", "☆"}};
+
 int main()
 {
     // スタート画面の表示
@@ -27,8 +29,7 @@ int main()
     std::random_device rng;
 
     // 山札の定義
-    unordered_map<string, string> correspondence_table{{"spade", "♠"}, {"heart", "♥"}, {"club", "♣"}, {"diamond", "♦"}, {"joker", "☆"}};
-    vector<string> card_marks = {"spade", "heart", "club", "diamond"};
+    const vector<string> card_marks = {"spade", "heart", "club", "diamond"};
     vector<string> card_nums;
     card_nums.emplace_back("A");
     for (int i = 2; i <= 10; i++)
@@ -66,7 +67,7 @@ int main()
     // 最初のplayerを決定
     int active_player = rng() % player_num;
 
-    display_place(players_cards, correspondence_table, active_player, player_statuses);
+    display_place(players_cards, active_player, player_statuses);
     cout << "Let's discard! ";
     press_enter_to_continue();
 
@@ -93,7 +94,7 @@ int main()
     bool continue_game = true;
     while (continue_game)
     {
-        display_place(players_cards, correspondence_table, active_player, player_statuses);
+        display_place(players_cards, active_player, player_statuses);
 
         // カードを取られるプレイヤーを計算
         int robbed_player = get_robbed_player(player_statuses, active_player);
@@ -113,7 +114,7 @@ int main()
         update_rank(players_cards, player_statuses, robbed_player, rank);
 
         // カードを手札に加えた後の様子をdisplay
-        display_place(players_cards, correspondence_table, active_player, player_statuses);
+        display_place(players_cards, active_player, player_statuses);
         if (active_player != player_num - 1)
         {
             cout << "CPU seems to have been chosen a card. ";
@@ -131,12 +132,12 @@ int main()
 
             if (active_player == player_num - 1)
             {
-                display_place(players_cards, correspondence_table, active_player, player_statuses);
+                display_place(players_cards, active_player, player_statuses);
                 press_enter_to_continue();
             }
             else
             {
-                display_place(players_cards, correspondence_table, active_player, player_statuses);
+                display_place(players_cards, active_player, player_statuses);
                 cout << "CPU " << active_player + 1 << " seems to have discarded. ";
                 press_enter_to_continue();
             }
@@ -158,7 +159,7 @@ int main()
     // 1人残ったplayerのstatusを更新
     update_final_status(player_statuses, players_cards);
 
-    display_place(players_cards, correspondence_table, active_player, player_statuses);
+    display_place(players_cards, active_player, player_statuses);
 
     return 0;
 }
@@ -265,7 +266,7 @@ void hand_out_cards(vector<vector<pair<string, string>>> &players_cards, vector<
     }
 }
 
-void display_place(vector<vector<pair<string, string>>> players_cards, unordered_map<string, string> correspondence_table,
+void display_place(vector<vector<pair<string, string>>> players_cards,
                    int active_player, vector<string> player_statuses)
 {
     int card_width = 7;
@@ -329,7 +330,7 @@ void display_place(vector<vector<pair<string, string>>> players_cards, unordered
     {
         for (int i = 0; i < players_cards.at(your_number).size(); i++)
         {
-            cout << "[" << correspondence_table.at(players_cards.at(your_number).at(i).first) << " ";
+            cout << "[" << kSymbolTable.at(players_cards.at(your_number).at(i).first) << " ";
             if (players_cards.at(your_number).at(i).second.length() == 1)
             {
                 cout << " ";
