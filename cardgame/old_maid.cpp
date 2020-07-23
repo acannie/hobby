@@ -46,6 +46,7 @@ int main()
     vector<vector<pair<string, string>>> players_cards;
     hand_out_cards(players_cards, deck, total_cards_num, player_num);
 
+    // Welcome Displayをlinuxのコンソールから消去して画面をクリーンにする
     system("reset"); // linux command
 
     // playerごとに状態（プレイ中または順位）を保持
