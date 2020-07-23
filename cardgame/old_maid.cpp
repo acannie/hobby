@@ -4,27 +4,27 @@ using namespace std;
 void display_welcome();
 void make_deck(vector<pair<string, string>> *deck);
 int get_CPU_num(int total_cards_num);
-void hand_out_cards(vector<vector<pair<string, string>>> *players_cards, vector<pair<string, string>> deck, int total_cards_num, int player_num);
-void init_ranks(vector<vector<pair<string, string>>> players_cards, vector<string> *player_statuses, int *rank);
-void display_place(vector<vector<pair<string, string>>> player_cards, int active_player, vector<string> player_statuses);
-int get_robbed_player(vector<string> player_statuses, int active_player);
-int get_robbed_card_index(vector<vector<pair<string, string>>> players_cards, int active_player, int robbed_player);
-bool is_discard_found(vector<vector<pair<string, string>>> players_cards, int active_player, pair<string, string> robbed_card);
-void update_rank(vector<vector<pair<string, string>>> players_cards, vector<string> *player_statuses, int player, int *rank);
-bool game_finished(vector<string> player_statuses);
+void hand_out_cards(vector<vector<pair<string, string>>> *players_cards, vector<pair<string, string>>* deck, int total_cards_num, int player_num);
+void init_ranks(const vector<vector<pair<string, string>>>& players_cards, vector<string> *player_statuses, int *rank);
+void display_place(const vector<vector<pair<string, string>>>& player_cards, int active_player, const vector<string>& player_statuses);
+int get_robbed_player(const vector<string>& player_statuses, int active_player);
+int get_robbed_card_index(const vector<vector<pair<string, string>>>& players_cards, int active_player, int robbed_player);
+bool is_discard_found(const vector<vector<pair<string, string>>>& players_cards, int active_player, const pair<string, string>& robbed_card);
+void update_rank(const vector<vector<pair<string, string>>>& players_cards, vector<string> *player_statuses, int player, int *rank);
+bool game_finished(const vector<string>& player_statuses);
 bool discard(vector<pair<string, string>> *player_cards);
 string notation_of_rank(int rank);
 void press_enter_to_continue();
-int get_next_active_player(vector<string> player_statuses, int active_player);
-void update_final_status(vector<string> *player_statuses, vector<vector<pair<string, string>>> players_cards);
+int get_next_active_player(const vector<string>& player_statuses, int active_player);
+void update_final_status(vector<string> *player_statuses, vector<vector<pair<string, string>>>* players_cards);
 
 void game_setup(vector<vector<pair<string, string>>> *players_cards, vector<string> *player_statuses, int *rank, int *total_cards_num, int *player_num, int *active_player);
 void game(vector<vector<pair<string, string>>> *players_cards, vector<string> *player_statuses, int *rank, int *active_player);
 void game_finalize(vector<vector<pair<string, string>>> *players_cards, vector<string> *player_statuses, int active_player);
 
-const unordered_map<string, string> kSymbolTable{{"spade", "♠"}, {"heart", "♥"}, {"club", "♣"}, {"diamond", "♦"}, {"joker", "☆"}};
-const vector<string> kCardMarks = {"spade", "heart", "club", "diamond"};
-const vector<string> kCardNums = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+const unordered_map<string, string>& kSymbolTable{{"spade", "♠"}, {"heart", "♥"}, {"club", "♣"}, {"diamond", "♦"}, {"joker", "☆"}};
+const vector<string>& kCardMarks = {"spade", "heart", "club", "diamond"};
+const vector<string>& kCardNums = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
 
 int main()
 {
@@ -119,7 +119,7 @@ int get_CPU_num(int total_cards_num)
     return CPU_num;
 }
 
-void hand_out_cards(vector<vector<pair<string, string>>> *players_cards, vector<pair<string, string>> deck, int total_cards_num, int player_num)
+void hand_out_cards(vector<vector<pair<string, string>>> *players_cards, vector<pair<string, string>>* deck, int total_cards_num, int player_num)
 {
     std::random_device rng;
 
@@ -145,14 +145,14 @@ void hand_out_cards(vector<vector<pair<string, string>>> *players_cards, vector<
         (*players_cards).emplace_back(0);
         for (int j = 0; j < dealt_card_num; j++)
         {
-            int randam_index = rng() % deck.size();
-            (*players_cards).at(i).emplace_back(deck.at(randam_index));
-            deck.erase(deck.begin() + randam_index);
+            int randam_index = rng() % (*deck).size();
+            (*players_cards).at(i).emplace_back((*deck).at(randam_index));
+            (*deck).erase((*deck).begin() + randam_index);
         }
     }
 }
 
-void init_ranks(vector<vector<pair<string, string>>> players_cards, vector<string> *player_statuses, int *rank)
+void init_ranks(const vector<vector<pair<string, string>>>& players_cards, vector<string> *player_statuses, int *rank)
 {
     int rank_count = 0;
     for (int i = 0; i < players_cards.size(); i++)
@@ -166,7 +166,7 @@ void init_ranks(vector<vector<pair<string, string>>> players_cards, vector<strin
     (*rank) += rank_count;
 }
 
-void display_place(vector<vector<pair<string, string>>> players_cards, int active_player, vector<string> player_statuses)
+void display_place(const vector<vector<pair<string, string>>>& players_cards, int active_player, const vector<string>& player_statuses)
 {
     int card_width = 7;
     // 最も多い手札の数を数える
@@ -249,7 +249,7 @@ void display_place(vector<vector<pair<string, string>>> players_cards, int activ
     cout << endl;
 }
 
-int get_robbed_player(vector<string> player_statuses, int active_player)
+int get_robbed_player(const vector<string>& player_statuses, int active_player)
 {
     int player_num = player_statuses.size();
     for (int i = 1; i < player_num; i++)
@@ -263,7 +263,7 @@ int get_robbed_player(vector<string> player_statuses, int active_player)
     return -1;
 }
 
-int get_robbed_card_index(vector<vector<pair<string, string>>> players_cards, int active_player, int robbed_player)
+int get_robbed_card_index(const vector<vector<pair<string, string>>>& players_cards, int active_player, int robbed_player)
 {
     int robbed_card_index;
     if (active_player == players_cards.size() - 1)
@@ -296,7 +296,7 @@ int get_robbed_card_index(vector<vector<pair<string, string>>> players_cards, in
     return robbed_card_index;
 }
 
-bool is_discard_found(vector<vector<pair<string, string>>> players_cards, int active_player, pair<string, string> robbed_card)
+bool is_discard_found(const vector<vector<pair<string, string>>>& players_cards, int active_player, const pair<string, string>& robbed_card)
 {
     for (auto it = players_cards.at(active_player).begin(); it != players_cards.at(active_player).end(); it++)
     {
@@ -308,7 +308,7 @@ bool is_discard_found(vector<vector<pair<string, string>>> players_cards, int ac
     return false;
 }
 
-void update_rank(vector<vector<pair<string, string>>> players_cards, vector<string> *player_statuses, int player, int *rank)
+void update_rank(const vector<vector<pair<string, string>>>& players_cards, vector<string> *player_statuses, int player, int *rank)
 {
     if (players_cards.at(player).size() == 0)
     {
@@ -317,7 +317,7 @@ void update_rank(vector<vector<pair<string, string>>> players_cards, vector<stri
     }
 }
 
-bool game_finished(vector<string> player_statuses)
+bool game_finished(const vector<string>& player_statuses)
 {
     int playing_count = 0;
     for (auto player_status : player_statuses)
@@ -405,7 +405,7 @@ void press_enter_to_continue()
     }
 }
 
-int get_next_active_player(vector<string> player_statuses, int active_player)
+int get_next_active_player(const vector<string>& player_statuses, int active_player)
 {
     int player_num = player_statuses.size();
     for (int i = 1; i < player_num; i++)
@@ -419,14 +419,14 @@ int get_next_active_player(vector<string> player_statuses, int active_player)
     return -1;
 }
 
-void update_final_status(vector<string> *player_statuses, vector<vector<pair<string, string>>> players_cards)
+void update_final_status(vector<string> *player_statuses, vector<vector<pair<string, string>>>* players_cards)
 {
     for (int i = 0; i < (*player_statuses).size(); i++)
     {
         if ((*player_statuses).at(i) == "playing")
         {
             (*player_statuses).at(i) = "lose!";
-            players_cards.at(i).erase(players_cards.at(i).begin());
+            (*players_cards).at(i).erase((*players_cards).at(i).begin());
         }
     }
 }
@@ -452,7 +452,7 @@ void game_setup(vector<vector<pair<string, string>>> *players_cards, vector<stri
     *player_num = get_CPU_num(*total_cards_num) + 1;
 
     // カードを配る
-    hand_out_cards(players_cards, deck, *total_cards_num, *player_num);
+    hand_out_cards(players_cards, &deck, *total_cards_num, *player_num);
 
     // Welcome Displayをlinuxのコンソールから消去して画面をクリーンにする
     system("reset"); // linux command
@@ -548,10 +548,9 @@ void game(vector<vector<pair<string, string>>> *players_cards, vector<string> *p
     }
 }
 
-void game_finalize(vector<vector<pair<string, string>>> *players_cards, vector<string> *player_statuses,
-                   int active_player)
+void game_finalize(vector<vector<pair<string, string>>> *players_cards, vector<string> *player_statuses, int active_player)
 {
     // 1人残ったplayerのstatusを更新
-    update_final_status(player_statuses, *players_cards);
+    update_final_status(player_statuses, players_cards);
     display_place(*players_cards, active_player, *player_statuses);
 }
