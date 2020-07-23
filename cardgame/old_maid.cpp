@@ -2,7 +2,7 @@
 using namespace std;
 
 void display_welcome();
-void make_deck(vector<pair<string, string>> &deck, vector<string> card_marks, vector<string> card_nums);
+void make_deck(vector<pair<string, string>> &deck);
 int get_CPU_num(int total_cards_num);
 void hand_out_cards(vector<vector<pair<string, string>>> &players_cards, vector<pair<string, string>> deck, int total_cards_num, int player_num);
 void display_place(vector<vector<pair<string, string>>> player_cards,
@@ -19,6 +19,8 @@ int get_next_active_player(vector<string> player_statuses, int active_player);
 void update_final_status(vector<string> &player_statuses, vector<vector<pair<string, string>>> players_cards);
 
 const unordered_map<string, string> kSymbolTable{{"spade", "♠"}, {"heart", "♥"}, {"club", "♣"}, {"diamond", "♦"}, {"joker", "☆"}};
+const vector<string> kCardMarks = {"spade", "heart", "club", "diamond"};
+const vector<string> kCardNums = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
 
 int main()
 {
@@ -29,19 +31,8 @@ int main()
     std::random_device rng;
 
     // 山札の定義
-    const vector<string> card_marks = {"spade", "heart", "club", "diamond"};
-    vector<string> card_nums;
-    card_nums.emplace_back("A");
-    for (int i = 2; i <= 10; i++)
-    {
-        card_nums.emplace_back(to_string(i));
-    }
-    card_nums.emplace_back("J");
-    card_nums.emplace_back("Q");
-    card_nums.emplace_back("K");
-
     vector<pair<string, string>> deck;
-    make_deck(deck, card_marks, card_nums);
+    make_deck(deck);
 
     int total_cards_num = deck.size();
 
@@ -200,13 +191,13 @@ void display_welcome()
     cout << endl;
 }
 
-void make_deck(vector<pair<string, string>> &deck, vector<string> card_marks, vector<string> card_nums)
+void make_deck(vector<pair<string, string>> &deck)
 {
-    for (int i = 0; i < card_marks.size(); i++)
+    for (int i = 0; i < kCardMarks.size(); i++)
     {
-        for (int j = 0; j < card_nums.size(); j++)
+        for (int j = 0; j < kCardNums.size(); j++)
         {
-            deck.emplace_back(make_pair(card_marks.at(i), card_nums.at(j)));
+            deck.emplace_back(make_pair(kCardMarks.at(i), kCardNums.at(j)));
         }
     }
     deck.emplace_back(make_pair("joker", "jo"));
