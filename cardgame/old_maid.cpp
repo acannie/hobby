@@ -18,140 +18,38 @@ void press_enter_to_continue();
 int get_next_active_player(vector<string> player_statuses, int active_player);
 void update_final_status(vector<string> &player_statuses, vector<vector<pair<string, string>>> players_cards);
 
+void game_setup(vector<vector<pair<string, string>>> &players_cards, vector<string> &player_statuses,
+                int &rank, int &total_cards_num, int &player_num, int &active_player);
+void game(vector<vector<pair<string, string>>> &players_cards, vector<string> &player_statuses,
+          int &rank, int &active_player,
+          int total_cards_num, int player_num);
+void game_finalize(vector<vector<pair<string, string>>> &players_cards, vector<string> &player_statuses,
+                   int active_player);
+
 const unordered_map<string, string> kSymbolTable{{"spade", "♠"}, {"heart", "♥"}, {"club", "♣"}, {"diamond", "♦"}, {"joker", "☆"}};
 const vector<string> kCardMarks = {"spade", "heart", "club", "diamond"};
 const vector<string> kCardNums = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
 
 int main()
 {
-    // スタート画面の表示
-    display_welcome();
-
     // ランダム変数の宣言
     std::random_device rng;
 
-    // 山札の定義
-    vector<pair<string, string>> deck;
-    make_deck(deck);
-
-    int total_cards_num = deck.size();
-
-    // CPUの数
-    cout << "How many CPU do you want to play against? --> ";
-
-    int CPU_num = get_CPU_num(total_cards_num);
-    int player_num = CPU_num + 1;
-
-    // カードを配る
     vector<vector<pair<string, string>>> players_cards;
-    hand_out_cards(players_cards, deck, total_cards_num, player_num);
-
-    // Welcome Displayをlinuxのコンソールから消去して画面をクリーンにする
-    system("reset"); // linux command
-
-    // playerごとに状態（プレイ中または順位）を保持
     vector<string> player_statuses;
-    for (int i = 0; i < player_num; i++)
-    {
-        player_statuses.emplace_back("playing");
-    }
+    int rank = 1;
+    int player_num;
+    int total_cards_num;
 
     // 最初のplayerを決定
-    int active_player = rng() % player_num;
-
-    display_place(players_cards, active_player, player_statuses);
-    cout << "Let's discard! ";
-    press_enter_to_continue();
-
-    // 各playerが数字が等しいカードのペアを捨てる
-    for (auto it = players_cards.begin(); it != players_cards.end(); it++)
-    {
-        discard(*it);
-    }
-
-    // 各プレイヤーの順位を保持（初期値0）
-    int rank = 1;
-    int rank_count = 0;
-    for (int i = 0; i < player_num; i++)
-    {
-        if (players_cards.at(i).size() == 0)
-        {
-            player_statuses.at(i) = notation_of_rank(rank);
-            rank_count++;
-        }
-    }
-    rank += rank_count;
+    int active_player;
+    game_setup(players_cards, player_statuses, rank, total_cards_num, player_num, active_player);
 
     // ゲームスタート
-    bool continue_game = true;
-    while (continue_game)
-    {
-        display_place(players_cards, active_player, player_statuses);
+    game(players_cards, player_statuses, rank, active_player, total_cards_num, player_num);
 
-        // カードを取られるプレイヤーを計算
-        int robbed_player = get_robbed_player(player_statuses, active_player);
-
-        // 取るカードを決定
-        int robbed_card_index = get_robbed_card_index(players_cards, active_player, robbed_player, player_num);
-        pair<string, string> robbed_card = players_cards.at(robbed_player).at(robbed_card_index);
-
-        // 捨てられるカードのペアがあるか確認
-        bool discard_found = is_discard_found(players_cards, active_player, robbed_card);
-
-        // 取ったカードを手札に加える
-        players_cards.at(robbed_player).erase(players_cards.at(robbed_player).begin() + robbed_card_index);
-        players_cards.at(active_player).emplace_back(robbed_card);
-
-        // カードを取られたplayerの勝利判定
-        update_rank(players_cards, player_statuses, robbed_player, rank);
-
-        // カードを手札に加えた後の様子をdisplay
-        display_place(players_cards, active_player, player_statuses);
-        if (active_player != player_num - 1)
-        {
-            cout << "CPU seems to have been chosen a card. ";
-        }
-        if (discard_found && active_player == player_num - 1)
-        {
-            cout << "Let's discard! ";
-        }
-        press_enter_to_continue();
-
-        // active player がカードを捨てる
-        if (discard_found)
-        {
-            discard(players_cards.at(active_player));
-
-            if (active_player == player_num - 1)
-            {
-                display_place(players_cards, active_player, player_statuses);
-                press_enter_to_continue();
-            }
-            else
-            {
-                display_place(players_cards, active_player, player_statuses);
-                cout << "CPU " << active_player + 1 << " seems to have discarded. ";
-                press_enter_to_continue();
-            }
-        }
-
-        // active playerの勝利判定
-        update_rank(players_cards, player_statuses, active_player, rank);
-
-        // 終了判定
-        if (game_finished(player_statuses))
-        {
-            break;
-        }
-
-        // 次のactive player
-        active_player = get_next_active_player(player_statuses, active_player);
-    }
-
-    // 1人残ったplayerのstatusを更新
-    update_final_status(player_statuses, players_cards);
-
-    display_place(players_cards, active_player, player_statuses);
+    // ゲーム終了処理
+    game_finalize(players_cards, player_statuses, active_player);
 
     return 0;
 }
@@ -258,8 +156,7 @@ void hand_out_cards(vector<vector<pair<string, string>>> &players_cards, vector<
     }
 }
 
-void display_place(vector<vector<pair<string, string>>> players_cards,
-                   int active_player, vector<string> player_statuses)
+void display_place(vector<vector<pair<string, string>>> players_cards, int active_player, vector<string> player_statuses)
 {
     int card_width = 7;
     // 最も多い手札の数を数える
@@ -522,4 +419,139 @@ void update_final_status(vector<string> &player_statuses, vector<vector<pair<str
             players_cards.at(i).erase(players_cards.at(i).begin());
         }
     }
+}
+
+void game_setup(vector<vector<pair<string, string>>> &players_cards, vector<string> &player_statuses,
+                int &rank, int &total_cards_num, int &player_num, int &active_player)
+{
+    // スタート画面の表示
+    display_welcome();
+
+    // ランダム変数の宣言
+    std::random_device rng;
+
+    // 山札の定義
+    vector<pair<string, string>> deck;
+    make_deck(deck);
+
+    total_cards_num = deck.size();
+
+    // CPUの数
+    cout << "How many CPU do you want to play against? --> ";
+
+    player_num = get_CPU_num(total_cards_num) + 1;
+
+    // カードを配る
+    hand_out_cards(players_cards, deck, total_cards_num, player_num);
+
+    // Welcome Displayをlinuxのコンソールから消去して画面をクリーンにする
+    system("reset"); // linux command
+
+    // playerごとに状態（プレイ中または順位）を保持
+    for (int i = 0; i < player_num; i++)
+    {
+        player_statuses.emplace_back("playing");
+    }
+
+    active_player = rng() % player_num;
+
+    display_place(players_cards, active_player, player_statuses);
+    cout << "Let's discard! ";
+    press_enter_to_continue();
+
+    // 各playerが数字が等しいカードのペアを捨てる
+    for (auto it = players_cards.begin(); it != players_cards.end(); it++)
+    {
+        discard(*it);
+    }
+
+    // 各プレイヤーの順位を保持（初期値0）
+    int rank_count = 0;
+    for (int i = 0; i < player_num; i++)
+    {
+        if (players_cards.at(i).size() == 0)
+        {
+            player_statuses.at(i) = notation_of_rank(rank);
+            rank_count++;
+        }
+    }
+    rank += rank_count;
+}
+
+void game(vector<vector<pair<string, string>>> &players_cards, vector<string> &player_statuses,
+          int &rank, int &active_player,
+          int total_cards_num, int player_num)
+{
+    bool continue_game = true;
+    while (continue_game)
+    {
+        display_place(players_cards, active_player, player_statuses);
+
+        // カードを取られるプレイヤーを計算
+        int robbed_player = get_robbed_player(player_statuses, active_player);
+
+        // 取るカードを決定
+        int robbed_card_index = get_robbed_card_index(players_cards, active_player, robbed_player, player_num);
+        pair<string, string> robbed_card = players_cards.at(robbed_player).at(robbed_card_index);
+
+        // 捨てられるカードのペアがあるか確認
+        bool discard_found = is_discard_found(players_cards, active_player, robbed_card);
+
+        // 取ったカードを手札に加える
+        players_cards.at(robbed_player).erase(players_cards.at(robbed_player).begin() + robbed_card_index);
+        players_cards.at(active_player).emplace_back(robbed_card);
+
+        // カードを取られたplayerの勝利判定
+        update_rank(players_cards, player_statuses, robbed_player, rank);
+
+        // カードを手札に加えた後の様子をdisplay
+        display_place(players_cards, active_player, player_statuses);
+        if (active_player != player_num - 1)
+        {
+            cout << "CPU seems to have been chosen a card. ";
+        }
+        if (discard_found && active_player == player_num - 1)
+        {
+            cout << "Let's discard! ";
+        }
+        press_enter_to_continue();
+
+        // active player がカードを捨てる
+        if (discard_found)
+        {
+            discard(players_cards.at(active_player));
+
+            if (active_player == player_num - 1)
+            {
+                display_place(players_cards, active_player, player_statuses);
+                press_enter_to_continue();
+            }
+            else
+            {
+                display_place(players_cards, active_player, player_statuses);
+                cout << "CPU " << active_player + 1 << " seems to have discarded. ";
+                press_enter_to_continue();
+            }
+        }
+
+        // active playerの勝利判定
+        update_rank(players_cards, player_statuses, active_player, rank);
+
+        // 終了判定
+        if (game_finished(player_statuses))
+        {
+            return;
+        }
+
+        // 次のactive player
+        active_player = get_next_active_player(player_statuses, active_player);
+    }
+}
+
+void game_finalize(vector<vector<pair<string, string>>> &players_cards, vector<string> &player_statuses,
+                   int active_player)
+{
+    // 1人残ったplayerのstatusを更新
+    update_final_status(player_statuses, players_cards);
+    display_place(players_cards, active_player, player_statuses);
 }
