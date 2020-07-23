@@ -34,7 +34,7 @@ int main()
 
     vector<vector<pair<string, string>>> players_cards;
     vector<string> player_statuses;
-    int rank = 1;
+    int rank = 1; // 現在あがった場合の順位
     int player_num;
 
     // 最初のplayerを決定
@@ -432,7 +432,7 @@ void update_final_status(vector<string> *player_statuses, vector<vector<pair<str
 }
 
 void game_setup(vector<vector<pair<string, string>>> *players_cards, vector<string> *player_statuses,
-                int *rank,  int *player_num, int *active_player)
+                int *rank, int *player_num, int *active_player)
 {
     // スタート画面の表示
     display_welcome();
