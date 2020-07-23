@@ -5,6 +5,8 @@ void display_welcome();
 void make_deck(vector<pair<string, string>> &deck);
 int get_CPU_num(int total_cards_num);
 void hand_out_cards(vector<vector<pair<string, string>>> &players_cards, vector<pair<string, string>> deck, int total_cards_num, int player_num);
+void init_ranks(vector<vector<pair<string, string>>> players_cards, vector<string> &player_statuses,
+                int &rank, int player_num);
 void display_place(vector<vector<pair<string, string>>> player_cards,
                    int active_player, vector<string> player_statuses);
 int get_robbed_player(vector<string> player_statuses, int active_player);
@@ -154,6 +156,21 @@ void hand_out_cards(vector<vector<pair<string, string>>> &players_cards, vector<
             deck.erase(deck.begin() + randam_index);
         }
     }
+}
+
+void init_ranks(vector<vector<pair<string, string>>> players_cards, vector<string> &player_statuses,
+                int &rank, int player_num)
+{
+    int rank_count = 0;
+    for (int i = 0; i < player_num; i++)
+    {
+        if (players_cards.at(i).size() == 0)
+        {
+            player_statuses.at(i) = notation_of_rank(rank);
+            rank_count++;
+        }
+    }
+    rank += rank_count;
 }
 
 void display_place(vector<vector<pair<string, string>>> players_cards, int active_player, vector<string> player_statuses)
@@ -466,16 +483,7 @@ void game_setup(vector<vector<pair<string, string>>> &players_cards, vector<stri
     }
 
     // 各プレイヤーの順位を保持（初期値0）
-    int rank_count = 0;
-    for (int i = 0; i < player_num; i++)
-    {
-        if (players_cards.at(i).size() == 0)
-        {
-            player_statuses.at(i) = notation_of_rank(rank);
-            rank_count++;
-        }
-    }
-    rank += rank_count;
+    init_ranks(players_cards, player_statuses, rank, player_num);
 }
 
 void game(vector<vector<pair<string, string>>> &players_cards, vector<string> &player_statuses,
