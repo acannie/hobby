@@ -36,14 +36,14 @@ void game(vector<vector<pair<string, string>>> *players_cards,
 void game_finalize(vector<vector<pair<string, string>>> *players_cards,
                    vector<string> *player_statuses, int active_player);
 
-const unordered_map<string, string> &kSymbolTable{{"spade", "♠"},
-                                                  {"heart", "♥"},
-                                                  {"club", "♣"},
-                                                  {"diamond", "♦"},
-                                                  {"joker", "☆"}};
-const vector<string> &kCardMarks = {"spade", "heart", "club", "diamond"};
-const vector<string> &kCardNums = {"A", "2", "3",  "4", "5", "6", "7",
-                                   "8", "9", "10", "J", "Q", "K"};
+const unordered_map<string, string> kSymbolTable{{"spade", "♠"},
+                                                 {"heart", "♥"},
+                                                 {"club", "♣"},
+                                                 {"diamond", "♦"},
+                                                 {"joker", "☆"}};
+const vector<string> kCardMarks = {"spade", "heart", "club", "diamond"};
+const vector<string> kCardNums = {"A", "2", "3",  "4", "5", "6", "7",
+                                  "8", "9", "10", "J", "Q", "K"};
 const int total_cards_num = kCardMarks.size() * kCardNums.size() + 1;
 
 int main() {
