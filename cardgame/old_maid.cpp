@@ -11,9 +11,10 @@ void display_welcome();
 void make_deck(std::vector<std::pair<std::string, std::string>> *deck);
 int get_CPU_num();
 void hand_out_cards(
+    int player_num,
     std::vector<std::vector<std::pair<std::string, std::string>>>
         *players_cards,
-    std::vector<std::pair<std::string, std::string>> *deck, int player_num);
+    std::vector<std::pair<std::string, std::string>> *deck);
 void init_ranks(
     const std::vector<std::vector<std::pair<std::string, std::string>>>
         &players_cards,
@@ -55,10 +56,10 @@ void game(std::vector<std::vector<std::pair<std::string, std::string>>>
               *players_cards,
           std::vector<std::string> *player_statuses, int *rank,
           int *active_player);
-void game_finalize(std::vector<std::vector<std::pair<std::string, std::string>>>
+void game_finalize(int active_player,
+                   std::vector<std::vector<std::pair<std::string, std::string>>>
                        *players_cards,
-                   std::vector<std::string> *player_statuses,
-                   int active_player);
+                   std::vector<std::string> *player_statuses);
 
 const std::unordered_map<std::string, std::string> &kSymbolTable{
     {"spade", "♠"},
@@ -89,7 +90,7 @@ int main() {
   game(&players_cards, &player_statuses, &rank, &active_player);
 
   // ゲーム終了処理
-  game_finalize(&players_cards, &player_statuses, active_player);
+  game_finalize(active_player, &players_cards, &player_statuses);
 
   return 0;
 }
@@ -151,9 +152,10 @@ int get_CPU_num() {
 }
 
 void hand_out_cards(
+    int player_num,
     std::vector<std::vector<std::pair<std::string, std::string>>>
         *players_cards,
-    std::vector<std::pair<std::string, std::string>> *deck, int player_num) {
+    std::vector<std::pair<std::string, std::string>> *deck) {
   std::random_device rng;
 
   const int total_cards_num = kCardNums.size() * kCardMarks.size() + 1;
@@ -452,7 +454,7 @@ void game_setup(std::vector<std::vector<std::pair<std::string, std::string>>>
   *player_num = get_CPU_num() + 1;
 
   // カードを配る
-  hand_out_cards(players_cards, &deck, *player_num);
+  hand_out_cards(*player_num, players_cards, &deck);
 
   // Welcome Displayをlinuxのコンソールから消去して画面をクリーンにする
   system("reset");  // linux command
@@ -546,10 +548,10 @@ void game(std::vector<std::vector<std::pair<std::string, std::string>>>
   }
 }
 
-void game_finalize(std::vector<std::vector<std::pair<std::string, std::string>>>
+void game_finalize(int active_player,
+                   std::vector<std::vector<std::pair<std::string, std::string>>>
                        *players_cards,
-                   std::vector<std::string> *player_statuses,
-                   int active_player) {
+                   std::vector<std::string> *player_statuses) {
   // 1人残ったplayerのstatusを更新
   update_final_status(player_statuses, players_cards);
   display_place(*players_cards, active_player, *player_statuses);
