@@ -96,6 +96,7 @@ void display_welcome() {
     cout << "-";
   }
   cout << endl;
+  cout << endl;
 }
 
 void make_deck(vector<pair<string, string>> *deck) {
