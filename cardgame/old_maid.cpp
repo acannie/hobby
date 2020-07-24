@@ -105,7 +105,7 @@ void display_welcome() {
 
   int max_len = 0;
   for (auto message : welcome_messages) {
-    max_len = std::max(max_len, (int)message.length());
+    max_len = std::max(max_len, static_cast<int>(message.length()));
   }
 
   for (int i = 0; i < max_len + 4; i++) {
@@ -207,7 +207,8 @@ void display_place(
   // 最も多い手札の数を数える
   int max_card_num = 0;
   for (auto player_cards : players_cards) {
-    max_card_num = std::max(max_card_num, (int)player_cards.size());
+    max_card_num =
+        std::max(max_card_num, static_cast<int>(player_cards.size()));
   }
 
   std::cout
@@ -311,8 +312,7 @@ int get_robbed_card_index(
     }
     getchar();
     robbed_card_index -= 1;
-  } else  // active player がCPUの場合、選ぶカードはランダムに決定
-  {
+  } else {  // active player がCPUの場合、選ぶカードはランダムに決定
     std::random_device rng;
     press_enter_to_continue();
     robbed_card_index = rng() % (players_cards.at(robbed_player).size());
