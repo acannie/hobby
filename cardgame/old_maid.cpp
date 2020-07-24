@@ -3,7 +3,7 @@ using namespace std;
 
 void display_welcome();
 void make_deck(vector<pair<string, string>> *deck);
-int get_CPU_num(int total_cards_num);
+int get_CPU_num();
 void hand_out_cards(vector<vector<pair<string, string>>> *players_cards,
                     vector<pair<string, string>> *deck, int player_num);
 void init_ranks(const vector<vector<pair<string, string>>> &players_cards,
@@ -36,15 +36,14 @@ void game(vector<vector<pair<string, string>>> *players_cards,
 void game_finalize(vector<vector<pair<string, string>>> *players_cards,
                    vector<string> *player_statuses, int active_player);
 
-const unordered_map<string, string> kSymbolTable{{"spade", "♠"},
-                                                 {"heart", "♥"},
-                                                 {"club", "♣"},
-                                                 {"diamond", "♦"},
-                                                 {"joker", "☆"}};
-const vector<string> kCardMarks = {"spade", "heart", "club", "diamond"};
-const vector<string> kCardNums = {"A", "2", "3",  "4", "5", "6", "7",
-                                  "8", "9", "10", "J", "Q", "K"};
-const int total_cards_num = kCardMarks.size() * kCardNums.size() + 1;
+const unordered_map<string, string> &kSymbolTable{{"spade", "♠"},
+                                                  {"heart", "♥"},
+                                                  {"club", "♣"},
+                                                  {"diamond", "♦"},
+                                                  {"joker", "☆"}};
+const vector<string> &kCardMarks = {"spade", "heart", "club", "diamond"};
+const vector<string> &kCardNums = {"A", "2", "3",  "4", "5", "6", "7",
+                                   "8", "9", "10", "J", "Q", "K"};
 
 int main() {
   // ランダム変数の宣言
@@ -52,7 +51,7 @@ int main() {
 
   vector<vector<pair<string, string>>> players_cards;
   vector<string> player_statuses;
-  int rank = 1;  // 現在あがった場合の順位
+  int rank = 1;
   int player_num;
 
   // 最初のplayerを決定
@@ -110,6 +109,7 @@ void make_deck(vector<pair<string, string>> *deck) {
 
 int get_CPU_num() {
   int CPU_num;
+  const int total_cards_num = kCardMarks.size() * kCardNums.size() + 1;
   while (1) {
     cin >> CPU_num;
 
@@ -127,6 +127,8 @@ int get_CPU_num() {
 void hand_out_cards(vector<vector<pair<string, string>>> *players_cards,
                     vector<pair<string, string>> *deck, int player_num) {
   std::random_device rng;
+
+  const int total_cards_num = kCardNums.size() * kCardMarks.size() + 1;
 
   // 配られるカードの枚数が1枚多くなるplayerの数
   int remainder_num = total_cards_num % player_num;
