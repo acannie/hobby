@@ -67,10 +67,10 @@ const std::unordered_map<std::string, std::string> &kSymbolTable{
     {"club", "♣"},
     {"diamond", "♦"},
     {"joker", "☆"}};
-const std::vector<std::string> &kCardMarks = {"spade", "heart", "club",
-                                              "diamond"};
-const std::vector<std::string> &kCardNums = {"A", "2", "3",  "4", "5", "6", "7",
-                                             "8", "9", "10", "J", "Q", "K"};
+const std::vector<std::string> kCardMarks = {"spade", "heart", "club",
+                                             "diamond"};
+const std::vector<std::string> kCardNums = {"A", "2", "3",  "4", "5", "6", "7",
+                                            "8", "9", "10", "J", "Q", "K"};
 
 int main() {
   // ランダム変数の宣言
